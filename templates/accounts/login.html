@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Login · AppointED{% endblock %}
+{% block content %}
+<div class="grid lg:grid-cols-2 gap-8 items-center max-w-4xl mx-auto">
+  <div class="hidden lg:flex flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-8 min-h-[420px]">
+    <div>
+      <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium mb-6">
+        {% icon "calendar" "w-4 h-4" %}<span>Faculty appointment scheduling</span>
+      </div>
+      <h1 class="text-2xl font-bold leading-snug">Check availability and book faculty consultations online.</h1>
+      <p class="mt-3 text-sm text-indigo-100">No more walk-in guesswork—pick an open slot, send a request, and track every status update.</p>
+    </div>
+    <ul class="space-y-2.5 text-sm text-indigo-100">
+      <li class="flex items-center gap-2">{% icon "check-circle" "w-5 h-5 text-emerald-300" %}<span>Real-time open time slots</span></li>
+      <li class="flex items-center gap-2">{% icon "check-circle" "w-5 h-5 text-emerald-300" %}<span>Clear Pending, Approved, and Completed statuses</span></li>
+      <li class="flex items-center gap-2">{% icon "check-circle" "w-5 h-5 text-emerald-300" %}<span>Full status history on every appointment</span></li>
+    </ul>
+  </div>
+
+  <div class="card p-6 sm:p-8 max-w-md w-full mx-auto">
+    <h1 class="text-xl font-bold mb-1">Welcome back</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Sign in with your school email.</p>
+
+    {% if form.non_field_errors %}
+      <div class="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-200 px-3.5 py-2.5 text-sm">
+        {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4">{% csrf_token %}
+      {% for f in form %}{% include "_field.html" %}{% endfor %}
+      <button class="btn btn-primary w-full py-2.5">Login</button>
+    </form>
+
+    <p class="text-sm text-center text-slate-500 dark:text-slate-400 mt-6">
+      No account yet? <a class="text-indigo-600 dark:text-indigo-400 font-medium hover:underline" href="{% url 'accounts:register' %}">Create one</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
