@@ -1,0 +1,20 @@
+{% load ui %}
+<div class="flex flex-wrap items-center gap-2">
+  {% for s in actions %}
+    {% if s == 'CANCELLED' %}
+      {% url 'scheduling:appointment_status' appt.pk as cancel_url %}
+      {% with modal_id=appt.pk|stringformat:"s" %}
+        {% include "_confirm.html" with id="cancel-"|add:modal_id trigger="Cancel" icon_name="x" title="Cancel this appointment?" body="This will mark the appointment as Cancelled and free the time slot." action=cancel_url status="CANCELLED" next=next confirm="Yes, cancel" %}
+      {% endwith %}
+    {% else %}
+      <form method="post" action="{% url 'scheduling:appointment_status' appt.pk %}" class="inline">{% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% if s == 'APPROVED' %}
+          <button name="status" value="APPROVED" class="btn btn-primary btn-sm">{% icon "check" "w-4 h-4" %}<span>Approve</span></button>
+        {% elif s == 'COMPLETED' %}
+          <button name="status" value="COMPLETED" class="btn btn-success btn-sm">{% icon "check-circle" "w-4 h-4" %}<span>Complete</span></button>
+        {% endif %}
+      </form>
+    {% endif %}
+  {% endfor %}
+</div>

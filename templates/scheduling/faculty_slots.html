@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}{{ faculty.full_name }} · AppointED{% endblock %}
+{% block content %}
+<a href="{% url 'scheduling:faculty_directory' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 mb-4">
+  {% icon "arrow-left" "w-4 h-4" %}<span>All faculty</span>
+</a>
+
+<div class="card p-5 mb-6 flex items-center gap-4">
+  <span class="avatar w-12 h-12 text-sm">{{ faculty.full_name|initials }}</span>
+  <div>
+    <h1 class="text-xl font-bold">{{ faculty.full_name }}</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400">{{ faculty.department|default:"No department" }}</p>
+  </div>
+</div>
+
+{% regroup slots by slot_date as day_groups %}
+<div class="space-y-6">
+  {% for day in day_groups %}
+    <section>
+      <div class="flex items-center gap-2 mb-2 px-1">
+        {% icon "calendar" "w-4 h-4 text-indigo-600 dark:text-indigo-400" %}
+        <h2 class="text-sm font-semibold">{{ day.grouper|friendly_day }}</h2>
+        <span class="text-xs text-slate-400">{{ day.grouper|date:"Y-m-d" }}</span>
+      </div>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {% for s in day.list %}
+          <div class="card p-4 flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2 text-sm font-medium">
+              {% icon "clock" "w-4 h-4 text-slate-400" %}
+              <span>{% slot_time s %}</span>
+            </div>
+            <a href="{% url 'scheduling:book' s.pk %}" class="btn btn-primary btn-sm">Book</a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% empty %}
+    <div class="card p-10 text-center text-sm text-slate-500 dark:text-slate-400">
+      <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 inline-flex items-center justify-center mb-3">{% icon "calendar" "w-6 h-6" %}</div>
+      <p class="font-medium text-slate-700 dark:text-slate-300">No open slots available</p>
+      <p class="text-xs mt-1 mb-4">This faculty member currently has no open consultation hours.</p>
+      <a href="{% url 'scheduling:faculty_directory' %}" class="btn btn-secondary btn-sm">Browse other faculty</a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}
