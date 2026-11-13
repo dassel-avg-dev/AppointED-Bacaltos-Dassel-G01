@@ -1,0 +1,21 @@
+{% load ui %}
+<a href="#{{ id }}" class="btn btn-danger btn-sm">{% icon icon_name|default:"x" "w-4 h-4" %}<span>{{ trigger }}</span></a>
+<div id="{{ id }}" class="hidden target:flex fixed inset-0 z-50 items-center justify-center bg-slate-900/60 p-4">
+  <div class="card p-6 max-w-sm w-full">
+    <div class="flex items-start gap-3 mb-4">
+      <span class="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-300 inline-flex items-center justify-center shrink-0">{% icon "exclamation" %}</span>
+      <div>
+        <h3 class="font-semibold text-base">{{ title }}</h3>
+        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ body }}</p>
+      </div>
+    </div>
+    <div class="flex justify-end gap-2">
+      <a href="#_" class="btn btn-secondary btn-sm">Keep it</a>
+      <form method="post" action="{{ action }}">{% csrf_token %}
+        {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+        {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+        <button class="btn btn-danger btn-sm">{{ confirm }}</button>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,9 @@
+{% load ui %}
+<div>
+  <label for="{{ f.id_for_label }}" class="label">{{ f.label }}</label>
+  {{ f }}
+  {% if f.help_text %}<p class="mt-1 text-xs text-slate-500 dark:text-slate-400">{{ f.help_text }}</p>{% endif %}
+  {% for err in f.errors %}
+    <p class="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">{% icon "exclamation" "w-4 h-4 shrink-0" %}<span>{{ err }}</span></p>
+  {% endfor %}
+</div>
