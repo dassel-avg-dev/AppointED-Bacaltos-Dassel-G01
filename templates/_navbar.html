@@ -1,0 +1,81 @@
+{% load ui %}
+{% with cur=request.resolver_match.view_name %}
+<header class="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur border-b border-slate-200 dark:border-slate-800">
+  <div class="max-w-5xl mx-auto px-4 sm:px-6">
+    <input type="checkbox" id="nav-open" class="peer sr-only">
+    <div class="h-16 flex items-center gap-4">
+      <a href="{% url 'scheduling:dashboard' %}" class="flex items-center gap-2.5 font-bold text-lg text-slate-900 dark:text-white">
+        <span class="w-8 h-8 rounded-lg bg-indigo-600 text-white inline-flex items-center justify-center text-sm font-bold">A</span>
+        <span>AppointED</span>
+      </a>
+
+      {% if user.is_authenticated %}
+      <nav class="hidden md:flex items-center gap-1 ml-4 text-sm font-medium">
+        {% if user.is_faculty %}
+          <a href="{% url 'scheduling:dashboard' %}" class="px-3 py-2 rounded-lg {% if cur == 'scheduling:dashboard' %}bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">Dashboard</a>
+          <a href="{% url 'scheduling:slot_list' %}" class="px-3 py-2 rounded-lg {% if 'slot' in cur %}bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">My Slots</a>
+          <a href="{% url 'scheduling:appointment_list' %}" class="px-3 py-2 rounded-lg {% if 'appointment' in cur %}bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">History</a>
+        {% elif user.is_student %}
+          <a href="{% url 'scheduling:dashboard' %}" class="px-3 py-2 rounded-lg {% if cur == 'scheduling:dashboard' %}bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">Dashboard</a>
+          <a href="{% url 'scheduling:faculty_directory' %}" class="px-3 py-2 rounded-lg {% if 'faculty' in cur or cur == 'scheduling:book' %}bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">Book</a>
+          <a href="{% url 'scheduling:appointment_list' %}" class="px-3 py-2 rounded-lg {% if 'appointment' in cur %}bg-indigo-50 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300{% else %}text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800{% endif %}">History</a>
+        {% elif user.is_staff %}
+          <a href="{% url 'admin:index' %}" class="px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800">Admin</a>
+        {% endif %}
+      </nav>
+      {% endif %}
+
+      <div class="ml-auto flex items-center gap-2">
+        <form method="post" action="{% url 'set_theme' %}">{% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          {% if theme == 'dark' %}
+            <button name="theme" value="light" title="Switch to light mode" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">{% icon "sun" %}</button>
+          {% else %}
+            <button name="theme" value="dark" title="Switch to dark mode" class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800">{% icon "moon" %}</button>
+          {% endif %}
+        </form>
+
+        {% if user.is_authenticated %}
+          <div class="hidden sm:flex items-center gap-2.5 pl-2 border-l border-slate-200 dark:border-slate-800">
+            <span class="avatar w-8 h-8">{{ user.full_name|initials }}</span>
+            <div class="leading-tight">
+              <div class="text-sm font-medium">{{ user.full_name }}</div>
+              <div class="text-xs text-slate-500 dark:text-slate-400">{{ user.get_role_display }}</div>
+            </div>
+          </div>
+          <form method="post" action="{% url 'accounts:logout' %}" class="hidden md:block">{% csrf_token %}
+            <button class="btn btn-secondary btn-sm" title="Log out">{% icon "logout" "w-4 h-4" %}<span>Logout</span></button>
+          </form>
+          <label for="nav-open" class="md:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer" aria-label="Menu">{% icon "menu" %}</label>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="btn btn-secondary btn-sm">Login</a>
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Register</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="hidden peer-checked:flex md:hidden flex-col gap-1 pb-4 pt-2 border-t border-slate-200 dark:border-slate-800 text-sm font-medium">
+      <div class="flex items-center gap-2.5 px-3 py-2 sm:hidden">
+        <span class="avatar w-8 h-8">{{ user.full_name|initials }}</span>
+        <div><div class="font-medium">{{ user.full_name }}</div><div class="text-xs text-slate-500">{{ user.get_role_display }}</div></div>
+      </div>
+      {% if user.is_faculty %}
+        <a href="{% url 'scheduling:dashboard' %}" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Dashboard</a>
+        <a href="{% url 'scheduling:slot_list' %}" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">My Slots</a>
+        <a href="{% url 'scheduling:appointment_list' %}" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">History</a>
+      {% elif user.is_student %}
+        <a href="{% url 'scheduling:dashboard' %}" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Dashboard</a>
+        <a href="{% url 'scheduling:faculty_directory' %}" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Book</a>
+        <a href="{% url 'scheduling:appointment_list' %}" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">History</a>
+      {% elif user.is_staff %}
+        <a href="{% url 'admin:index' %}" class="px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800">Admin</a>
+      {% endif %}
+      <form method="post" action="{% url 'accounts:logout' %}" class="pt-1">{% csrf_token %}
+        <button class="w-full text-left px-3 py-2 rounded-lg text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40">Logout</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</header>
+{% endwith %}

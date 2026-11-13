@@ -1,0 +1,32 @@
+/* AppointED indigo palette for Django Admin (light & dark) */
+:root, html[data-theme="light"] {
+  --primary: #4f46e5;
+  --secondary: #4338ca;
+  --accent: #e0e7ff;
+  --primary-fg: #ffffff;
+  --header-bg: #312e81;
+  --header-color: #e0e7ff;
+  --header-link-color: #ffffff;
+  --breadcrumbs-bg: #4338ca;
+  --breadcrumbs-fg: #e0e7ff;
+  --link-fg: #4f46e5;
+  --link-hover-color: #3730a3;
+  --button-bg: #4f46e5;
+  --button-hover-bg: #4338ca;
+  --default-button-bg: #3730a3;
+  --default-button-hover-bg: #312e81;
+}
+html[data-theme="dark"] {
+  --primary: #6366f1;
+  --secondary: #4f46e5;
+  --accent: #c7d2fe;
+  --header-bg: #1e1b4b;
+  --breadcrumbs-bg: #312e81;
+  --link-fg: #818cf8;
+  --link-hover-color: #a5b4fc;
+  --button-bg: #4f46e5;
+  --button-hover-bg: #6366f1;
+  --default-button-bg: #4338ca;
+  --default-button-hover-bg: #4f46e5;
+}
+#site-name a { font-weight: 700; letter-spacing: -0.01em; }

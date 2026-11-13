@@ -1,0 +1,21 @@
+{% load ui %}<!doctype html>
+<html lang="en" class="{% if theme == 'dark' %}dark{% endif %}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}AppointED{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><text x='16' y='22' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='white'>A</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  {% include "_styles.html" %}
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col antialiased">
+  {% include "_navbar.html" %}
+  <main class="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 flex-1">
+    {% include "_messages.html" %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="border-t border-slate-200 dark:border-slate-800 py-5 text-center text-xs text-slate-500 dark:text-slate-400">
+    AppointED · Faculty appointment scheduling
+  </footer>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{% extends "admin/base.html" %}
+{% load static %}
+{% block title %}{{ title }} | AppointED Admin{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/appointed.css' %}">{% endblock %}
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}">AppointED Admin</a></div>
+{% endblock %}
+{% block nav-global %}<a href="/" style="margin-left:1rem;font-size:.8rem;">← Back to site</a>{% endblock %}
