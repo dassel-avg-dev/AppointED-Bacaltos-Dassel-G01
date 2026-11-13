@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Add Time Slot · AppointED{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto">
+  <a href="{% url 'scheduling:slot_list' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 mb-4">
+    {% icon "arrow-left" "w-4 h-4" %}<span>Back to My Slots</span>
+  </a>
+  <div class="card p-6 sm:p-8">
+    <div class="flex items-center gap-3 mb-6">
+      <span class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 inline-flex items-center justify-center">{% icon "calendar" %}</span>
+      <div>
+        <h1 class="text-xl font-bold">Add time slot</h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400">Slots must be in the future and cannot overlap existing slots.</p>
+      </div>
+    </div>
+
+    {% if form.non_field_errors %}
+      <div class="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-200 px-3.5 py-2.5 text-sm">
+        {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-4">{% csrf_token %}
+      {% include "_field.html" with f=form.slot_date %}
+      <div class="grid sm:grid-cols-2 gap-4">
+        {% include "_field.html" with f=form.start_time %}
+        {% include "_field.html" with f=form.end_time %}
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <a href="{% url 'scheduling:slot_list' %}" class="btn btn-secondary">Cancel</a>
+        <button class="btn btn-primary">{% icon "check" "w-4 h-4" %}<span>Save slot</span></button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

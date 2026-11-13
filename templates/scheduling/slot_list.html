@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}My Time Slots · AppointED{% endblock %}
+{% block content %}
+<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-2xl font-bold">My Time Slots</h1>
+    <p class="text-sm text-slate-500 dark:text-slate-400">Slots with an appointment history cannot be deleted.</p>
+  </div>
+  <a href="{% url 'scheduling:slot_create' %}" class="btn btn-primary">{% icon "plus" "w-4 h-4" %}<span>Add slot</span></a>
+</div>
+
+{% regroup rows by slot_date as day_groups %}
+<div class="space-y-6">
+  {% for day in day_groups %}
+    <section>
+      <div class="flex items-center gap-2 mb-2 px-1">
+        {% icon "calendar" "w-4 h-4 text-indigo-600 dark:text-indigo-400" %}
+        <h2 class="text-sm font-semibold">{{ day.grouper|friendly_day }}</h2>
+        <span class="text-xs text-slate-400">{{ day.grouper|date:"Y-m-d" }}</span>
+      </div>
+      <div class="card divide-y divide-slate-200 dark:divide-slate-800">
+        {% for r in day.list %}
+          <div class="p-4 flex flex-wrap items-center gap-4 {% if r.slot.has_started and not r.active %}opacity-60{% endif %}">
+            <div class="flex items-center gap-2.5 flex-1 min-w-[200px]">
+              {% icon "clock" "w-4 h-4 text-slate-400 shrink-0" %}
+              <span class="font-medium text-sm">{% slot_time r.slot %}</span>
+              {% if r.slot.has_started %}<span class="badge badge-cancelled">Past</span>{% endif %}
+            </div>
+            <div class="flex items-center gap-3">
+              {% if r.active %}
+                <a href="{% url 'scheduling:appointment_detail' r.active.pk %}" class="text-xs text-slate-600 dark:text-slate-300 hover:underline">
+                  Booked by <span class="font-medium">{{ r.active.student.full_name }}</span>
+                </a>
+                {% status_badge r.active.status %}
+              {% elif not r.slot.has_started %}
+                <span class="badge badge-completed">Open</span>
+              {% endif %}
+              {% if r.deletable %}
+                {% url 'scheduling:slot_delete' r.slot.pk as del_url %}
+                {% with sid=r.slot.pk|stringformat:"s" %}
+                  {% include "_confirm.html" with id="del-slot-"|add:sid trigger="Delete" icon_name="trash" title="Delete this time slot?" body="This open time slot will be permanently removed." action=del_url confirm="Delete slot" %}
+                {% endwith %}
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  {% empty %}
+    <div class="card p-10 text-center text-sm text-slate-500 dark:text-slate-400">
+      <div class="mx-auto w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 inline-flex items-center justify-center mb-3">{% icon "calendar" "w-6 h-6" %}</div>
+      <p class="font-medium text-slate-700 dark:text-slate-300">No time slots yet</p>
+      <p class="text-xs mt-1 mb-4">Add your available consultation hours so students can book appointments.</p>
+      <a href="{% url 'scheduling:slot_create' %}" class="btn btn-primary btn-sm">{% icon "plus" "w-4 h-4" %}<span>Add your first slot</span></a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

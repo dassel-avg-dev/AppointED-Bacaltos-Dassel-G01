@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Appointment #{{ appt.pk }} · AppointED{% endblock %}
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <a href="{% url 'scheduling:appointment_list' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 mb-4">
+    {% icon "arrow-left" "w-4 h-4" %}<span>Back to history</span>
+  </a>
+
+  <div class="card p-6 sm:p-8">
+    <div class="flex flex-wrap items-start justify-between gap-3 pb-5 border-b border-slate-200 dark:border-slate-800">
+      <div>
+        <div class="text-xs text-slate-500 dark:text-slate-400">Appointment #{{ appt.pk }}</div>
+        <h1 class="text-xl font-bold mt-0.5">{{ appt.type }}</h1>
+      </div>
+      {% status_badge appt.status %}
+    </div>
+
+    <dl class="grid sm:grid-cols-2 gap-4 py-5 border-b border-slate-200 dark:border-slate-800 text-sm">
+      <div>
+        <dt class="text-xs text-slate-500 dark:text-slate-400">Student</dt>
+        <dd class="font-medium mt-0.5">{{ appt.student.full_name }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500 dark:text-slate-400">Faculty</dt>
+        <dd class="font-medium mt-0.5">{{ appt.slot.faculty.full_name }}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500 dark:text-slate-400">When</dt>
+        <dd class="font-medium mt-0.5">{% slot_when appt.slot %}</dd>
+      </div>
+      <div>
+        <dt class="text-xs text-slate-500 dark:text-slate-400">Requested</dt>
+        <dd class="font-medium mt-0.5">{{ appt.created_at|date:"M j, Y · g:i A" }}</dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-xs text-slate-500 dark:text-slate-400">Purpose</dt>
+        <dd class="mt-1 text-slate-700 dark:text-slate-200">{{ appt.purpose }}</dd>
+      </div>
+    </dl>
+
+    {% if actions %}
+      <div class="py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3">
+        <span class="text-xs text-slate-500 dark:text-slate-400">Available actions</span>
+        {% include "scheduling/_actions.html" with next="" %}
+      </div>
+    {% endif %}
+
+    <div class="pt-5">
+      <h2 class="font-semibold text-sm mb-4">Status history</h2>
+      <ol class="relative border-l-2 border-slate-200 dark:border-slate-800 ml-2.5 space-y-4">
+        {% for l in logs %}
+          <li class="ml-5">
+            <span class="absolute -left-[7px] mt-1.5 w-3 h-3 rounded-full ring-4 ring-white dark:ring-slate-900
+              {% if l.new_status == 'PENDING' %}bg-amber-500
+              {% elif l.new_status == 'APPROVED' %}bg-blue-500
+              {% elif l.new_status == 'COMPLETED' %}bg-emerald-500
+              {% else %}bg-slate-400{% endif %}"></span>
+            <div class="flex flex-wrap items-center gap-2 text-sm">
+              <span class="font-medium">{{ l.old_status|default:"(new)" }} → {{ l.new_status }}</span>
+              {% if l.changed_by %}
+                <span class="text-xs text-slate-500 dark:text-slate-400">by {{ l.changed_by.full_name }}</span>
+              {% endif %}
+            </div>
+            <div class="text-xs text-slate-400 mt-0.5">{{ l.changed_at|date:"M j, Y · g:i A" }}</div>
+          </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</div>
+{% endblock %}
