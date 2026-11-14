@@ -38,10 +38,40 @@ class AccountTests(TestCase):
         with self.assertRaises(IntegrityError), transaction.atomic():
             User.objects.create_user("b@x.com", "pw", full_name="B", role="HACKER")
 
+    def test_registration_shows_success_message(self):
+        r = self.client.post(
+            reverse("accounts:register"),
+            {
+                "email": "a@x.com", "full_name": "A", "role": "STUDENT",
+                "department": self.dept.pk,
+                "password1": "S3cure-pass-99", "password2": "S3cure-pass-99",
+            },
+            follow=True,
+        )
+        self.assertContains(r, "Your account was created successfully.")
+
     def test_login_with_email(self):
         User.objects.create_user("a@x.com", "S3cure-pass-99", full_name="A")
-        r = self.client.post(reverse("accounts:login"), {"username": "a@x.com", "password": "S3cure-pass-99"})
-        self.assertEqual(r.status_code, 302)
+        r = self.client.post(
+            reverse("accounts:login"),
+            {"username": "a@x.com", "password": "S3cure-pass-99"},
+            follow=True,
+        )
+        self.assertEqual(r.redirect_chain[0][1], 302)
+        self.assertContains(r, "You are now logged in.")
+
+    def test_invalid_login_shows_error(self):
+        r = self.client.post(
+            reverse("accounts:login"),
+            {"username": "missing@x.com", "password": "wrong"},
+        )
+        self.assertContains(r, "Please enter a correct email and password.")
+
+    def test_logout_shows_success_message(self):
+        user = User.objects.create_user("a@x.com", "pw", full_name="A")
+        self.client.force_login(user)
+        r = self.client.post(reverse("accounts:logout"), follow=True)
+        self.assertContains(r, "You have been logged out.")
 
     def test_superuser_is_admin_with_admin_access(self):
         u = User.objects.create_superuser("root@x.com", "pw", full_name="Root")

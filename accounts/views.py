@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect, render
@@ -12,6 +13,7 @@ def register(request):
     if request.method == "POST" and form.is_valid():
         user = form.save()
         login(request, user)
+        messages.success(request, "Your account was created successfully.")
         return redirect("scheduling:dashboard")
     return render(request, "accounts/register.html", {"form": form})
 
@@ -21,6 +23,13 @@ class AppLoginView(LoginView):
     template_name = "accounts/login.html"
     redirect_authenticated_user = True
 
+    def form_valid(self, form):
+        messages.success(self.request, "You are now logged in.")
+        return super().form_valid(form)
+
 
 class AppLogoutView(LogoutView):
-    pass
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        messages.success(request, "You have been logged out.")
+        return response
