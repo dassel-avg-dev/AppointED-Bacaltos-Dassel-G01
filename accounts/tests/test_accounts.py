@@ -73,6 +73,39 @@ class AccountTests(TestCase):
         r = self.client.post(reverse("accounts:logout"), follow=True)
         self.assertContains(r, "You have been logged out.")
 
+    def test_profile_requires_login(self):
+        r = self.client.get(reverse("accounts:profile"))
+        self.assertRedirects(r, f"{reverse('accounts:login')}?next={reverse('accounts:profile')}")
+
+    def test_user_can_view_and_update_own_profile(self):
+        user = User.objects.create_user(
+            "a@x.com", "pw", full_name="A", department=self.dept
+        )
+        other = User.objects.create_user("b@x.com", "pw", full_name="B")
+        self.client.force_login(user)
+        self.assertContains(self.client.get(reverse("accounts:profile")), "My Profile")
+        r = self.client.post(
+            reverse("accounts:profile"),
+            {"email": "updated@x.com", "full_name": "Updated Name", "department": ""},
+        )
+        self.assertRedirects(r, reverse("accounts:profile"))
+        user.refresh_from_db()
+        other.refresh_from_db()
+        self.assertEqual((user.email, user.full_name), ("updated@x.com", "Updated Name"))
+        self.assertEqual(other.email, "b@x.com")
+
+    def test_profile_rejects_duplicate_email(self):
+        user = User.objects.create_user("a@x.com", "pw", full_name="A")
+        User.objects.create_user("b@x.com", "pw", full_name="B")
+        self.client.force_login(user)
+        r = self.client.post(
+            reverse("accounts:profile"),
+            {"email": "b@x.com", "full_name": "Changed", "department": ""},
+        )
+        self.assertEqual(r.status_code, 200)
+        user.refresh_from_db()
+        self.assertEqual((user.email, user.full_name), ("a@x.com", "A"))
+
     def test_superuser_is_admin_with_admin_access(self):
         u = User.objects.create_superuser("root@x.com", "pw", full_name="Root")
         self.assertEqual(u.role, "ADMIN")
