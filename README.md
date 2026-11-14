@@ -1,6 +1,6 @@
 # AppointED
 
-Django appointment system (students book faculty time slots). See `context/SDD.md`.
+Django appointment system (students book faculty time slots).
 
 ## Setup
 ```powershell
