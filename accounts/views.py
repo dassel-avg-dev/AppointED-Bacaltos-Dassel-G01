@@ -1,9 +1,10 @@
 from django.contrib import messages
 from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView, LogoutView
 from django.shortcuts import redirect, render
 
-from .forms import EmailAuthenticationForm, RegistrationForm
+from .forms import EmailAuthenticationForm, ProfileForm, RegistrationForm
 
 
 def register(request):
@@ -26,6 +27,16 @@ class AppLoginView(LoginView):
     def form_valid(self, form):
         messages.success(self.request, "You are now logged in.")
         return super().form_valid(form)
+
+
+@login_required
+def profile(request):
+    form = ProfileForm(request.POST or None, instance=request.user)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        messages.success(request, "Your profile was updated successfully.")
+        return redirect("accounts:profile")
+    return render(request, "accounts/profile.html", {"form": form})
 
 
 class AppLogoutView(LogoutView):

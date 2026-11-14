@@ -34,5 +34,11 @@ class RegistrationForm(TailwindFormMixin, UserCreationForm):
         return user
 
 
+class ProfileForm(TailwindFormMixin, forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("full_name", "email", "department")
+
+
 class EmailAuthenticationForm(TailwindFormMixin, AuthenticationForm):
     username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={"autofocus": True}))
