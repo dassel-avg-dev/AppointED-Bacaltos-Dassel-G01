@@ -37,6 +37,9 @@
                 <span class="badge badge-completed">Open</span>
               {% endif %}
               {% if r.deletable %}
+                {% if not r.slot.has_started %}
+                  <a href="{% url 'scheduling:slot_edit' r.slot.pk %}" class="btn btn-secondary btn-sm">Edit</a>
+                {% endif %}
                 {% url 'scheduling:slot_delete' r.slot.pk as del_url %}
                 {% with sid=r.slot.pk|stringformat:"s" %}
                   {% include "_confirm.html" with id="del-slot-"|add:sid trigger="Delete" icon_name="trash" title="Delete this time slot?" body="This open time slot will be permanently removed." action=del_url confirm="Delete slot" %}

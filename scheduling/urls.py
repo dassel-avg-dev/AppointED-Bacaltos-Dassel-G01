@@ -8,6 +8,7 @@ urlpatterns = [
     path("", views.dashboard, name="dashboard"),
     path("faculty/slots/", views.slot_list, name="slot_list"),
     path("faculty/slots/new/", views.slot_create, name="slot_create"),
+    path("faculty/slots/<int:slot_id>/edit/", views.slot_edit, name="slot_edit"),
     path("faculty/slots/<int:slot_id>/delete/", views.slot_delete, name="slot_delete"),
     path("faculty-directory/", views.faculty_directory, name="faculty_directory"),
     path("faculty-directory/<int:user_id>/", views.faculty_slots, name="faculty_slots"),

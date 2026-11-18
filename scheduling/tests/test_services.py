@@ -187,3 +187,24 @@ class ServiceTests(TestCase):
         a = services.book_appointment(self.s, slot, self.t, "x")
         services.change_status(a, Status.CANCELLED, self.s)
         services.book_appointment(self.s2, slot, self.t, "y")
+
+    def test_update_slot_success_and_self_overlap(self):
+        slot = services.create_slot(self.f, self._date(), datetime.time(9), datetime.time(11))
+        updated = services.update_slot(self.f, slot, self._date(), datetime.time(9, 30), datetime.time(11))
+        self.assertEqual(updated.start_time, datetime.time(9, 30))
+        self.assertEqual(updated.end_time, datetime.time(11))
+
+    def test_update_slot_rejections(self):
+        slot = services.create_slot(self.f, self._date(), datetime.time(9), datetime.time(10))
+        services.create_slot(self.f, self._date(), datetime.time(11), datetime.time(12))
+        with self.assertRaises(BusinessRuleError):
+            services.update_slot(self.f2, slot, self._date(), datetime.time(9), datetime.time(10))
+        with self.assertRaises(BusinessRuleError):
+            services.update_slot(self.f, slot, self._date(-1), datetime.time(9), datetime.time(10))
+        with self.assertRaises(BusinessRuleError):
+            services.update_slot(self.f, slot, self._date(), datetime.time(10), datetime.time(9))
+        with self.assertRaises(BusinessRuleError):
+            services.update_slot(self.f, slot, self._date(), datetime.time(10, 30), datetime.time(11, 30))
+        services.book_appointment(self.s, slot, self.t, "x")
+        with self.assertRaises(BusinessRuleError):
+            services.update_slot(self.f, slot, self._date(), datetime.time(8), datetime.time(9))

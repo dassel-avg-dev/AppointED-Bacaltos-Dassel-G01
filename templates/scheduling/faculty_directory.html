@@ -7,6 +7,26 @@
   <p class="text-sm text-slate-500 dark:text-slate-400">Select a faculty member to view their open consultation hours.</p>
 </div>
 
+<form method="get" class="card p-4 mb-6 flex flex-col sm:flex-row gap-3">
+  <div class="relative flex-1">
+    <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-slate-400">{% icon "search" "w-4 h-4" %}</span>
+    <input type="text" name="q" value="{{ query }}" placeholder="Search faculty by name or email..."
+           class="input pl-9 w-full">
+  </div>
+  <select name="department" class="input sm:w-64" aria-label="Filter by department">
+    <option value="">All departments</option>
+    {% for dept in departments %}
+      <option value="{{ dept.pk }}" {% if selected_department == dept.pk|stringformat:"s" %}selected{% endif %}>{{ dept.name }}</option>
+    {% endfor %}
+  </select>
+  <div class="flex items-center gap-2">
+    <button type="submit" class="btn btn-primary">Filter</button>
+    {% if query or selected_department %}
+      <a href="{% url 'scheduling:faculty_directory' %}" class="btn btn-secondary">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
   {% for r in rows %}
     <a href="{% url 'scheduling:faculty_slots' r.faculty.pk %}" class="card p-5 flex flex-col justify-between gap-4 hover:ring-indigo-500 dark:hover:ring-indigo-500 transition {% if not r.open_count %}opacity-75{% endif %}">

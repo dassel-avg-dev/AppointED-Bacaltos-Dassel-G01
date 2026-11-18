@@ -10,22 +10,45 @@ class BusinessRuleError(Exception):
     pass
 
 
-def create_slot(faculty, slot_date, start_time, end_time):
+def _validate_slot_window(faculty, slot_date, start_time, end_time, exclude_pk=None):
     if not faculty.is_faculty:  # BR-05
-        raise BusinessRuleError("Only faculty can create time slots.")
+        raise BusinessRuleError("Only faculty can manage time slots.")
     if end_time <= start_time:  # BR-03
         raise BusinessRuleError("End time must be later than start time.")
     slot = TimeSlot(faculty=faculty, slot_date=slot_date, start_time=start_time, end_time=end_time)
     if slot.start_datetime <= timezone.now():  # X1
-        raise BusinessRuleError("Time slots cannot be created in the past.")
-    if TimeSlot.objects.filter(faculty=faculty, slot_date=slot_date, start_time=start_time).exists():
+        raise BusinessRuleError("Time slots cannot be scheduled in the past.")
+    dup_qs = TimeSlot.objects.filter(faculty=faculty, slot_date=slot_date, start_time=start_time)
+    if exclude_pk is not None:
+        dup_qs = dup_qs.exclude(pk=exclude_pk)
+    if dup_qs.exists():
         raise BusinessRuleError("You already have a slot starting at that date and time.")  # BR-04
-    overlap = TimeSlot.objects.filter(  # X2
+    overlap_qs = TimeSlot.objects.filter(  # X2
         faculty=faculty, slot_date=slot_date, start_time__lt=end_time, end_time__gt=start_time
-    ).exists()
-    if overlap:
+    )
+    if exclude_pk is not None:
+        overlap_qs = overlap_qs.exclude(pk=exclude_pk)
+    if overlap_qs.exists():
         raise BusinessRuleError("This slot overlaps one of your existing slots.")
+    return slot
+
+
+def create_slot(faculty, slot_date, start_time, end_time):
+    slot = _validate_slot_window(faculty, slot_date, start_time, end_time)
     slot.save()
+    return slot
+
+
+def update_slot(faculty, slot, slot_date, start_time, end_time):
+    if slot.faculty_id != faculty.pk:
+        raise BusinessRuleError("You can only edit your own slots.")
+    if slot.appointments.exists():  # BR-13
+        raise BusinessRuleError("A slot that has appointments cannot be edited.")
+    _validate_slot_window(faculty, slot_date, start_time, end_time, exclude_pk=slot.pk)
+    slot.slot_date = slot_date
+    slot.start_time = start_time
+    slot.end_time = end_time
+    slot.save(update_fields=["slot_date", "start_time", "end_time"])
     return slot
 
 

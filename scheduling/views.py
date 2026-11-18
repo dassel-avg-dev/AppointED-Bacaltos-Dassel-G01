@@ -1,16 +1,19 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from accounts.decorators import faculty_required, student_required
-from accounts.models import User
+from accounts.models import Department, User
 
 from . import services
 from .forms import BookingForm, TimeSlotForm
-from .models import Appointment, Status, TimeSlot
+from .models import Appointment, AppointmentType, Status, TimeSlot
 from .services import BusinessRuleError
 
 
@@ -97,6 +100,27 @@ def slot_create(request):
 
 
 @faculty_required
+def slot_edit(request, slot_id):
+    slot = get_object_or_404(TimeSlot, pk=slot_id, faculty=request.user)
+    if slot.appointments.exists():
+        messages.error(request, "A slot that has appointments cannot be edited.")
+        return redirect("scheduling:slot_list")
+    form = TimeSlotForm(
+        request.POST or None,
+        initial={"slot_date": slot.slot_date, "start_time": slot.start_time, "end_time": slot.end_time},
+    )
+    if request.method == "POST" and form.is_valid():
+        try:
+            services.update_slot(request.user, slot, **form.cleaned_data)
+        except BusinessRuleError as e:
+            form.add_error(None, str(e))
+        else:
+            messages.success(request, "Time slot updated.")
+            return redirect("scheduling:slot_list")
+    return render(request, "scheduling/slot_form.html", {"form": form, "slot": slot, "is_edit": True})
+
+
+@faculty_required
 @require_POST
 def slot_delete(request, slot_id):
     slot = get_object_or_404(TimeSlot, pk=slot_id, faculty=request.user)
@@ -111,12 +135,33 @@ def slot_delete(request, slot_id):
 # ---- Student: browse and book ----
 @student_required
 def faculty_directory(request):
-    faculty = User.objects.filter(role=User.Role.FACULTY, is_active=True).select_related("department")
+    query = request.GET.get("q", "").strip()
+    selected_department = request.GET.get("department", "").strip()
+    faculty = (
+        User.objects.filter(role=User.Role.FACULTY, is_active=True)
+        .select_related("department")
+        .prefetch_related("time_slots__appointments")
+    )
+    if query:
+        faculty = faculty.filter(Q(full_name__icontains=query) | Q(email__icontains=query))
+    if selected_department.isdigit():
+        faculty = faculty.filter(department_id=int(selected_department))
+    else:
+        selected_department = ""
     rows = [
         {"faculty": f, "open_count": sum(1 for s in f.time_slots.all() if s.is_open)}
         for f in faculty
     ]
-    return render(request, "scheduling/faculty_directory.html", {"rows": rows})
+    return render(
+        request,
+        "scheduling/faculty_directory.html",
+        {
+            "rows": rows,
+            "departments": Department.objects.all(),
+            "query": query,
+            "selected_department": selected_department,
+        },
+    )
 
 
 @student_required
@@ -152,7 +197,20 @@ def book(request, slot_id):
 def appointment_list(request):
     if request.user.is_admin_role:
         return redirect("admin:index")
-    all_appts = list(_appointments_for(request.user))
+    query = request.GET.get("q", "").strip()
+    selected_type = request.GET.get("type", "").strip()
+    qs = _appointments_for(request.user)
+    if query:
+        qs = qs.filter(
+            Q(purpose__icontains=query)
+            | Q(student__full_name__icontains=query)
+            | Q(slot__faculty__full_name__icontains=query)
+        )
+    if selected_type.isdigit():
+        qs = qs.filter(type_id=int(selected_type))
+    else:
+        selected_type = ""
+    all_appts = list(qs)
     active_status = request.GET.get("status", "")
     if active_status not in Status.values:
         active_status = ""
@@ -160,10 +218,24 @@ def appointment_list(request):
     tabs = [("", "All", len(all_appts))] + [
         (s.value, s.label, sum(1 for a in all_appts if a.status == s.value)) for s in Status
     ]
+    filter_params = {}
+    if query:
+        filter_params["q"] = query
+    if selected_type:
+        filter_params["type"] = selected_type
+    base_query = urlencode(filter_params)
     return render(
         request,
         "scheduling/appointment_list.html",
-        {"appointments": filtered, "tabs": tabs, "active_status": active_status},
+        {
+            "appointments": filtered,
+            "tabs": tabs,
+            "active_status": active_status,
+            "appointment_types": AppointmentType.objects.all(),
+            "query": query,
+            "selected_type": selected_type,
+            "base_query": base_query,
+        },
     )
 
 
