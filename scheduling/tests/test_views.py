@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 
-from accounts.models import User
+from accounts.models import Department, User
 from scheduling import services
 from scheduling.models import AppointmentType, Status
 
@@ -86,3 +86,57 @@ class ViewTests(TestCase):
         appt.refresh_from_db()
         self.assertEqual(appt.status, Status.APPROVED)
         self.assertEqual(appt.logs.count(), 2)
+
+    def test_faculty_edits_unbooked_slot(self):
+        import datetime
+        from django.utils import timezone
+        slot = future_slot(self.f, days=3, hour=9, length=1)
+        self.client.force_login(self.f)
+        url = reverse("scheduling:slot_edit", args=[slot.pk])
+        self.assertEqual(self.client.get(url).status_code, 200)
+        new_date = (timezone.localtime() + datetime.timedelta(days=4)).date()
+        r = self.client.post(url, {"slot_date": new_date, "start_time": "10:00", "end_time": "11:30"})
+        self.assertRedirects(r, reverse("scheduling:slot_list"))
+        slot.refresh_from_db()
+        self.assertEqual(slot.slot_date, new_date)
+        self.assertEqual(slot.start_time, datetime.time(10, 0))
+        self.assertEqual(slot.end_time, datetime.time(11, 30))
+
+    def test_slot_edit_gating_and_booked_rejection(self):
+        slot = future_slot(self.f)
+        url = reverse("scheduling:slot_edit", args=[slot.pk])
+        self.client.force_login(self.s)
+        self.assertEqual(self.client.get(url).status_code, 403)
+        self.client.force_login(self.f2)
+        self.assertEqual(self.client.get(url).status_code, 404)
+        services.book_appointment(self.s, slot, self.t, "Advising")
+        self.client.force_login(self.f)
+        r = self.client.get(url)
+        self.assertRedirects(r, reverse("scheduling:slot_list"))
+
+    def test_faculty_directory_filters(self):
+        ccs = Department.objects.create(name="CCS")
+        eng = Department.objects.create(name="Engineering")
+        self.f.department = ccs
+        self.f.save(update_fields=["department"])
+        self.f2.department = eng
+        self.f2.save(update_fields=["department"])
+        self.client.force_login(self.s)
+        r = self.client.get(reverse("scheduling:faculty_directory"), {"department": ccs.pk})
+        self.assertContains(r, self.f.full_name)
+        self.assertNotContains(r, self.f2.full_name)
+        r2 = self.client.get(reverse("scheduling:faculty_directory"), {"q": "Fac2"})
+        self.assertContains(r2, self.f2.full_name)
+        self.assertNotContains(r2, "Fac\n")
+
+    def test_appointment_list_search_and_type_filter(self):
+        t2 = AppointmentType.objects.exclude(pk=self.t.pk).first()
+        services.book_appointment(self.s, future_slot(self.f, days=2, hour=9), self.t, "Thesis outline")
+        services.book_appointment(self.s, future_slot(self.f, days=2, hour=11), t2, "Clearance form")
+        self.client.force_login(self.s)
+        r = self.client.get(reverse("scheduling:appointment_list"), {"q": "Thesis"})
+        self.assertContains(r, "Thesis outline")
+        self.assertNotContains(r, "Clearance form")
+        r2 = self.client.get(reverse("scheduling:appointment_list"), {"type": t2.pk})
+        self.assertContains(r2, "Clearance form")
+        self.assertNotContains(r2, "Thesis outline")
