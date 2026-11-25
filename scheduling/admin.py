@@ -1,4 +1,5 @@
 from django.contrib import admin, messages
+from django.db import transaction
 
 from . import services
 from .models import Appointment, AppointmentLog, AppointmentType, Status, TimeSlot
@@ -36,11 +37,12 @@ class AppointmentAdmin(admin.ModelAdmin):
     actions = ["approve", "cancel", "complete"]
 
     def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
-        if not change:  # log creation so history stays complete
-            AppointmentLog.objects.create(
-                appointment=obj, changed_by=request.user, old_status=None, new_status=obj.status
-            )
+        with transaction.atomic():
+            super().save_model(request, obj, form, change)
+            if not change:  # log creation so history stays complete
+                AppointmentLog.objects.create(
+                    appointment=obj, changed_by=request.user, old_status=None, new_status=obj.status
+                )
 
     def _apply(self, request, queryset, status):
         for appt in queryset:

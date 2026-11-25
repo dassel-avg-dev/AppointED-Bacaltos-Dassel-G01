@@ -1,9 +1,10 @@
 """Business-rule enforcement. All slot/appointment mutations go through here."""
 
 from django.db import IntegrityError, transaction
+from django.db.models import ProtectedError
+from django.utils import timezone
 
 from .models import Appointment, AppointmentLog, Status, TimeSlot
-from django.utils import timezone
 
 
 class BusinessRuleError(Exception):
@@ -33,13 +34,20 @@ def _validate_slot_window(faculty, slot_date, start_time, end_time, exclude_pk=N
     return slot
 
 
+@transaction.atomic
 def create_slot(faculty, slot_date, start_time, end_time):
     slot = _validate_slot_window(faculty, slot_date, start_time, end_time)
-    slot.save()
+    try:
+        with transaction.atomic():
+            slot.save()
+    except IntegrityError:
+        raise BusinessRuleError("You already have a slot starting at that date and time.")
     return slot
 
 
+@transaction.atomic
 def update_slot(faculty, slot, slot_date, start_time, end_time):
+    slot = TimeSlot.objects.select_for_update().get(pk=slot.pk)
     if slot.faculty_id != faculty.pk:
         raise BusinessRuleError("You can only edit your own slots.")
     if slot.appointments.exists():  # BR-13
@@ -48,16 +56,26 @@ def update_slot(faculty, slot, slot_date, start_time, end_time):
     slot.slot_date = slot_date
     slot.start_time = start_time
     slot.end_time = end_time
-    slot.save(update_fields=["slot_date", "start_time", "end_time"])
+    try:
+        with transaction.atomic():
+            slot.save(update_fields=["slot_date", "start_time", "end_time"])
+    except IntegrityError:
+        raise BusinessRuleError("You already have a slot starting at that date and time.")
     return slot
 
 
+@transaction.atomic
 def delete_slot(faculty, slot):
+    slot = TimeSlot.objects.select_for_update().get(pk=slot.pk)
     if slot.faculty_id != faculty.pk:
         raise BusinessRuleError("You can only delete your own slots.")
     if slot.appointments.exists():  # BR-13
         raise BusinessRuleError("A slot that has appointments cannot be deleted.")
-    slot.delete()
+    try:
+        with transaction.atomic():
+            slot.delete()
+    except ProtectedError:
+        raise BusinessRuleError("A slot that has appointments cannot be deleted.")
 
 
 def _log(appointment, old, new, actor):

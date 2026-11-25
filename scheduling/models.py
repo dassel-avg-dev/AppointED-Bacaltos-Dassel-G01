@@ -64,6 +64,8 @@ class TimeSlot(models.Model):
 
     @property
     def active_appointment(self):
+        if hasattr(self, "_prefetched_objects_cache") and "appointments" in self._prefetched_objects_cache:
+            return next((a for a in self.appointments.all() if a.status != Status.CANCELLED), None)
         return self.appointments.exclude(status=Status.CANCELLED).first()
 
     @property
