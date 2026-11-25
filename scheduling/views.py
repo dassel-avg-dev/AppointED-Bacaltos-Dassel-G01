@@ -88,14 +88,18 @@ def slot_list(request):
 @faculty_required
 def slot_create(request):
     form = TimeSlotForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        try:
-            services.create_slot(request.user, **form.cleaned_data)
-        except BusinessRuleError as e:
-            form.add_error(None, str(e))
+    if request.method == "POST":
+        if form.is_valid():
+            try:
+                services.create_slot(request.user, **form.cleaned_data)
+            except BusinessRuleError as e:
+                form.add_error(None, str(e))
+                messages.error(request, str(e))
+            else:
+                messages.success(request, "Time slot added.")
+                return redirect("scheduling:slot_list")
         else:
-            messages.success(request, "Time slot added.")
-            return redirect("scheduling:slot_list")
+            messages.error(request, "Please correct the errors below.")
     return render(request, "scheduling/slot_form.html", {"form": form})
 
 
@@ -105,18 +109,25 @@ def slot_edit(request, slot_id):
     if slot.appointments.exists():
         messages.error(request, "A slot that has appointments cannot be edited.")
         return redirect("scheduling:slot_list")
+    if slot.has_started:
+        messages.error(request, "Past time slots cannot be edited.")
+        return redirect("scheduling:slot_list")
     form = TimeSlotForm(
         request.POST or None,
         initial={"slot_date": slot.slot_date, "start_time": slot.start_time, "end_time": slot.end_time},
     )
-    if request.method == "POST" and form.is_valid():
-        try:
-            services.update_slot(request.user, slot, **form.cleaned_data)
-        except BusinessRuleError as e:
-            form.add_error(None, str(e))
+    if request.method == "POST":
+        if form.is_valid():
+            try:
+                services.update_slot(request.user, slot, **form.cleaned_data)
+            except BusinessRuleError as e:
+                form.add_error(None, str(e))
+                messages.error(request, str(e))
+            else:
+                messages.success(request, "Time slot updated.")
+                return redirect("scheduling:slot_list")
         else:
-            messages.success(request, "Time slot updated.")
-            return redirect("scheduling:slot_list")
+            messages.error(request, "Please correct the errors below.")
     return render(request, "scheduling/slot_form.html", {"form": form, "slot": slot, "is_edit": True})
 
 
@@ -169,26 +180,37 @@ def faculty_slots(request, user_id):
     faculty = get_object_or_404(
         User.objects.select_related("department"), pk=user_id, role=User.Role.FACULTY, is_active=True
     )
-    slots = [s for s in faculty.time_slots.all() if s.is_open]
+    slots = [s for s in faculty.time_slots.prefetch_related("appointments") if s.is_open]
     return render(request, "scheduling/faculty_slots.html", {"faculty": faculty, "slots": slots})
 
 
 @student_required
 def book(request, slot_id):
     slot = get_object_or_404(
-        TimeSlot.objects.select_related("faculty", "faculty__department"), pk=slot_id
+        TimeSlot.objects.select_related("faculty", "faculty__department"),
+        pk=slot_id,
+        faculty__role=User.Role.FACULTY,
+        faculty__is_active=True,
     )
+    if slot.has_started:
+        messages.error(request, "This slot has already started or passed.")
+        return redirect("scheduling:faculty_slots", user_id=slot.faculty_id)
+    if slot.active_appointment is not None:
+        messages.error(request, "This slot is already booked.")
+        return redirect("scheduling:faculty_slots", user_id=slot.faculty_id)
     form = BookingForm(request.POST or None)
-    if request.method == "POST" and form.is_valid():
-        try:
-            appt = services.book_appointment(
-                request.user, slot, form.cleaned_data["type"], form.cleaned_data["purpose"]
-            )
-        except BusinessRuleError as e:
-            messages.error(request, str(e))
-            return redirect("scheduling:faculty_slots", user_id=slot.faculty_id)
-        messages.success(request, "Appointment requested. Waiting for faculty approval.")
-        return redirect("scheduling:appointment_detail", appointment_id=appt.pk)
+    if request.method == "POST":
+        if form.is_valid():
+            try:
+                appt = services.book_appointment(
+                    request.user, slot, form.cleaned_data["type"], form.cleaned_data["purpose"]
+                )
+            except BusinessRuleError as e:
+                messages.error(request, str(e))
+                return redirect("scheduling:faculty_slots", user_id=slot.faculty_id)
+            messages.success(request, "Appointment requested. Waiting for faculty approval.")
+            return redirect("scheduling:appointment_detail", appointment_id=appt.pk)
+        messages.error(request, "Please correct the errors below.")
     return render(request, "scheduling/book.html", {"slot": slot, "form": form})
 
 

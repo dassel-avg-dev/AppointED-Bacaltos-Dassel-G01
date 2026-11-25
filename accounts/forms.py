@@ -25,6 +25,18 @@ class RegistrationForm(TailwindFormMixin, UserCreationForm):
         model = User
         fields = ("email", "full_name", "role", "department")
 
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise forms.ValidationError("An account with this email already exists.")
+        return email
+
+    def clean_full_name(self):
+        full_name = self.cleaned_data["full_name"].strip()
+        if not full_name:
+            raise forms.ValidationError("Full name is required.")
+        return full_name
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = self.cleaned_data["role"]
@@ -39,6 +51,21 @@ class ProfileForm(TailwindFormMixin, forms.ModelForm):
         model = User
         fields = ("full_name", "email", "department")
 
+    def clean_email(self):
+        email = self.cleaned_data["email"].strip().lower()
+        if User.objects.filter(email__iexact=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("An account with this email already exists.")
+        return email
+
+    def clean_full_name(self):
+        full_name = self.cleaned_data["full_name"].strip()
+        if not full_name:
+            raise forms.ValidationError("Full name is required.")
+        return full_name
+
 
 class EmailAuthenticationForm(TailwindFormMixin, AuthenticationForm):
     username = forms.EmailField(label="Email", widget=forms.EmailInput(attrs={"autofocus": True}))
+
+    def clean_username(self):
+        return self.cleaned_data["username"].strip().lower()
