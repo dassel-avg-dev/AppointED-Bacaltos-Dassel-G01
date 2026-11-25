@@ -112,3 +112,29 @@ class AccountTests(TestCase):
         self.assertTrue(u.is_staff)
         self.client.force_login(u)
         self.assertEqual(self.client.get("/admin/").status_code, 200)
+
+    def test_registration_and_profile_reject_case_insensitive_duplicate_email(self):
+        User.objects.create_user("alice@x.com", "S3cure-pass-99", full_name="Alice")
+        r_reg = self._reg(email="ALICE@X.COM")
+        self.assertEqual(r_reg.status_code, 200)
+        self.assertContains(r_reg, "An account with this email already exists.")
+        self.assertEqual(User.objects.filter(email__iexact="alice@x.com").count(), 1)
+
+        bob = User.objects.create_user("bob@x.com", "S3cure-pass-99", full_name="Bob")
+        self.client.force_login(bob)
+        r_prof = self.client.post(
+            reverse("accounts:profile"),
+            {"email": "ALICE@X.COM", "full_name": "Bob", "department": ""},
+        )
+        self.assertEqual(r_prof.status_code, 200)
+        self.assertContains(r_prof, "An account with this email already exists.")
+        bob.refresh_from_db()
+        self.assertEqual(bob.email, "bob@x.com")
+
+    def test_login_normalizes_email_case(self):
+        User.objects.create_user("alice@x.com", "S3cure-pass-99", full_name="Alice")
+        r = self.client.post(
+            reverse("accounts:login"),
+            {"username": "  ALICE@X.COM ", "password": "S3cure-pass-99"},
+        )
+        self.assertEqual(r.status_code, 302)

@@ -16,7 +16,7 @@ Django faculty–student appointment scheduling system.
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-copy .env.example .env      # set DATABASE_URL for Supabase; omit for SQLite
+copy .env.example .env      # set DEBUG=True locally; set DATABASE_URL for Supabase or omit for SQLite
 python manage.py migrate
 python manage.py createsuperuser
 python manage.py runserver
@@ -32,6 +32,14 @@ python manage.py seed_demo
 
 ## Tests
 
+Run the full Django test suite (`accounts` and `scheduling`, including core feature and hardening tests):
+
 ```powershell
-python manage.py test
+python manage.py test -v 2
+```
+
+Run a specific test module (e.g., core hardening tests):
+
+```powershell
+python manage.py test scheduling.tests.test_hardening
 ```
