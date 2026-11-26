@@ -6,6 +6,7 @@ from config import views
 admin.site.site_header = "AppointED Admin"
 admin.site.site_title = "AppointED Admin"
 admin.site.index_title = "Manage users, slots and appointments"
+admin.site.site_url = "/accounts/profile/"
 
 handler403 = "config.views.permission_denied"
 handler404 = "config.views.page_not_found"

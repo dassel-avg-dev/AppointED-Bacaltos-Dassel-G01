@@ -16,4 +16,4 @@
   </a>
 </div>
 {% endblock %}
-{% block nav-global %}<a href="/" style="margin-left:1rem;font-size:.82rem;">← Back to site</a>{% endblock %}
+{% block nav-global %}<a href="{% url 'accounts:profile' %}" class="appointed-admin-back">← Back to site</a>{% endblock %}
