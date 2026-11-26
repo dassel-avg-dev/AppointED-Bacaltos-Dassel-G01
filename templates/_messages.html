@@ -1,13 +1,13 @@
 {% load ui %}
 {% for m in messages %}
-  <div>
-    <input type="checkbox" id="msg-{{ forloop.counter }}" class="peer sr-only">
-    <div class="flash peer-checked:hidden mb-4 flex items-center gap-3 rounded-xl px-4 py-3 text-sm ring-1
-      {% if 'error' in m.tags %}bg-rose-50 text-rose-800 ring-rose-600/20 dark:bg-rose-950/60 dark:text-rose-200 dark:ring-rose-500/30
-      {% else %}bg-emerald-50 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-950/60 dark:text-emerald-200 dark:ring-emerald-500/30{% endif %}">
-      {% if 'error' in m.tags %}{% icon "exclamation" "w-5 h-5 shrink-0" %}{% else %}{% icon "check-circle" "w-5 h-5 shrink-0" %}{% endif %}
-      <span class="flex-1">{{ m }}</span>
-      <label for="msg-{{ forloop.counter }}" class="cursor-pointer p-1 opacity-70 hover:opacity-100" aria-label="Dismiss">{% icon "x" "w-4 h-4" %}</label>
+  <div class="flash-item">
+    <input type="checkbox" id="msg-{{ forloop.counter }}" class="flash-dismiss sr-only">
+    <div class="toast-banner {% if 'error' in m.tags %}is-error{% endif %}" role="{% if 'error' in m.tags %}alert{% else %}status{% endif %}" aria-live="polite">
+      <span style="display:inline-flex;align-items:center;gap:8px;">
+        {% if 'error' in m.tags %}{% icon "exclamation" "w-4 h-4 shrink-0" %}{% else %}{% icon "check-circle" "w-4 h-4 shrink-0" %}{% endif %}
+        <span>{{ m }}</span>
+      </span>
+      <label for="msg-{{ forloop.counter }}" class="toast-dismiss-btn" aria-label="Dismiss notification">×</label>
     </div>
   </div>
 {% endfor %}

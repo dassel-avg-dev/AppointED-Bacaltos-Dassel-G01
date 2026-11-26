@@ -1,20 +1,25 @@
 {% load ui %}
-<a href="#{{ id }}" class="btn btn-danger btn-sm">{% icon icon_name|default:"x" "w-4 h-4" %}<span>{{ trigger }}</span></a>
-<div id="{{ id }}" class="hidden target:flex fixed inset-0 z-50 items-center justify-center bg-slate-900/60 p-4">
-  <div class="card p-6 max-w-sm w-full">
-    <div class="flex items-start gap-3 mb-4">
-      <span class="w-10 h-10 rounded-full bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-300 inline-flex items-center justify-center shrink-0">{% icon "exclamation" %}</span>
-      <div>
-        <h3 class="font-semibold text-base">{{ title }}</h3>
-        <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">{{ body }}</p>
+<a href="#{{ id }}" data-modal-target="{{ id }}" class="btn btn-cancel btn-sm">
+  {% icon icon_name|default:"x" "w-4 h-4" %}<span>{{ trigger }}</span>
+</a>
+<div id="{{ id }}" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ id }}">
+  <a href="#_" class="modal-backdrop-link" aria-label="Close confirmation dialog" tabindex="-1"></a>
+  <div class="modal-dialog">
+    <div><span class="pill-confirm">PLEASE CONFIRM</span></div>
+    <h2 id="modal-title-{{ id }}" class="modal-title">{{ title }}</h2>
+    <p class="page-subtitle">{{ body }}</p>
+    {% if context_title or context_sub %}
+      <div class="affected-box">
+        {% if context_title %}<p style="font-weight:600;margin:0 0 4px 0;">{{ context_title }}</p>{% endif %}
+        {% if context_sub %}<p style="margin:0;color:var(--ink-muted);">{{ context_sub }}</p>{% endif %}
       </div>
-    </div>
-    <div class="flex justify-end gap-2">
-      <a href="#_" class="btn btn-secondary btn-sm">Keep it</a>
-      <form method="post" action="{{ action }}">{% csrf_token %}
+    {% endif %}
+    <div class="action-row">
+      <a href="#_" data-modal-close data-modal-safe class="btn btn-soft">Keep it</a>
+      <form method="post" action="{{ action }}" style="display:inline;">{% csrf_token %}
         {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
         {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
-        <button class="btn btn-danger btn-sm">{{ confirm }}</button>
+        <button type="submit" class="btn btn-danger">{{ confirm }}</button>
       </form>
     </div>
   </div>

@@ -1,20 +1,26 @@
 {% load ui %}
-<div class="flex flex-wrap items-center gap-2">
+<div class="action-row">
+  {% if show_complete_hint and appt.status == 'APPROVED' and 'COMPLETED' not in actions %}
+    <span class="helper-inline">Complete after session</span>
+  {% endif %}
   {% for s in actions %}
     {% if s == 'CANCELLED' %}
       {% url 'scheduling:appointment_status' appt.pk as cancel_url %}
       {% with modal_id=appt.pk|stringformat:"s" %}
-        {% include "_confirm.html" with id="cancel-"|add:modal_id trigger="Cancel" icon_name="x" title="Cancel this appointment?" body="This will mark the appointment as Cancelled and free the time slot." action=cancel_url status="CANCELLED" next=next confirm="Yes, cancel" %}
+        {% include "_confirm.html" with id="cancel-"|add:modal_id trigger="Cancel" icon_name="x" title="Cancel this appointment?" body="You are about to cancel this scheduled appointment. This transition is permanent and recorded in history." context_title=appt.type context_sub=appt.slot action=cancel_url status="CANCELLED" next=next confirm="Yes, cancel appointment" %}
       {% endwith %}
     {% else %}
-      <form method="post" action="{% url 'scheduling:appointment_status' appt.pk %}" class="inline">{% csrf_token %}
+      <form method="post" action="{% url 'scheduling:appointment_status' appt.pk %}" style="display:inline;">{% csrf_token %}
         <input type="hidden" name="next" value="{{ next }}">
         {% if s == 'APPROVED' %}
-          <button name="status" value="APPROVED" class="btn btn-primary btn-sm">{% icon "check" "w-4 h-4" %}<span>Approve</span></button>
+          <button type="submit" name="status" value="APPROVED" class="btn btn-primary btn-sm">{% icon "check" "w-4 h-4" %}<span>Approve</span></button>
         {% elif s == 'COMPLETED' %}
-          <button name="status" value="COMPLETED" class="btn btn-success btn-sm">{% icon "check-circle" "w-4 h-4" %}<span>Complete</span></button>
+          <button type="submit" name="status" value="COMPLETED" class="btn btn-primary btn-sm">{% icon "check-circle" "w-4 h-4" %}<span>Complete</span></button>
         {% endif %}
       </form>
     {% endif %}
   {% endfor %}
+  {% if show_details %}
+    <a href="{% url 'scheduling:appointment_detail' appt.pk %}" class="btn btn-soft btn-sm">Details →</a>
+  {% endif %}
 </div>
