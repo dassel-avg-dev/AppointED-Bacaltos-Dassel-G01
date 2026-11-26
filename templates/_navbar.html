@@ -43,7 +43,7 @@
           {% icon "user" "w-5 h-5" %}<span>My Profile</span>
         </a>
       {% elif user.is_staff %}
-        <a href="{% url 'admin:index' %}" class="nav-item active" aria-current="page">
+        <a href="{% url 'admin:index' %}" class="nav-item {% if cur != 'accounts:profile' %}active{% endif %}" {% if cur != 'accounts:profile' %}aria-current="page"{% endif %}>
           {% icon "shield" "w-5 h-5" %}<span>Admin</span>
         </a>
         <a href="{% url 'accounts:profile' %}" class="nav-item {% if cur == 'accounts:profile' %}active{% endif %}" {% if cur == 'accounts:profile' %}aria-current="page"{% endif %}>
@@ -60,15 +60,6 @@
 
   <div class="sidebar-footer">
     <div class="sidebar-divider"></div>
-    <form method="post" action="{% url 'set_theme' %}">{% csrf_token %}
-      <input type="hidden" name="next" value="{{ request.get_full_path }}">
-      <button type="submit" name="theme" value="{% if theme == 'dark' %}light{% else %}dark{% endif %}" class="theme-row" aria-label="Toggle light or dark theme">
-        <span class="theme-row-label">
-          {% if theme == 'dark' %}{% icon "moon" "w-5 h-5" %}<span>Dark theme</span>{% else %}{% icon "sun" "w-5 h-5" %}<span>Light theme</span>{% endif %}
-        </span>
-        <span class="theme-pill-track" aria-hidden="true"><span class="theme-pill-thumb"></span></span>
-      </button>
-    </form>
     <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
       <button type="submit" class="nav-item">
         {% icon "logout" "w-5 h-5" %}<span>Logout</span>
