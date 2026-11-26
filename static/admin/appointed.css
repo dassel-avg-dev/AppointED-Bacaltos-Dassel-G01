@@ -1,26 +1,6 @@
-/* AppointED #102a56 navy + Lora/Inter palette for Django Admin (light & dark) */
-:root, html[data-theme="light"] {
-  --primary: #183f7d;
-  --secondary: #102a56;
-  --accent: #e5edf9;
-  --primary-fg: #ffffff;
-  --header-bg: #102a56;
-  --header-color: #dbe5f4;
-  --header-link-color: #eff3fa;
-  --breadcrumbs-bg: #193967;
-  --breadcrumbs-fg: #dbe5f4;
-  --link-fg: #183f7d;
-  --link-hover-color: #102a56;
-  --button-bg: #183f7d;
-  --button-hover-bg: #123163;
-  --default-button-bg: #102a56;
-  --default-button-hover-bg: #183f7d;
-  --body-bg: #f3f6fb;
-  --body-fg: #172d50;
-  --hairline-color: #e2e9f4;
-  --border-color: #ced8e8;
-}
-
+/* AppointED Dark Navy (#0b1426 / #102a56 / #14243e) as default Django Admin theme */
+:root,
+html[data-theme="auto"],
 html[data-theme="dark"] {
   --primary: #a8ccff;
   --secondary: #1e3a62;
@@ -31,8 +11,10 @@ html[data-theme="dark"] {
   --header-link-color: #eff5ff;
   --breadcrumbs-bg: #14243e;
   --breadcrumbs-fg: #b6c7df;
+  --breadcrumbs-link-fg: #dbe5f4;
   --link-fg: #a8ccff;
   --link-hover-color: #c3dcff;
+  --link-selected-fg: #8bb5f5;
   --button-bg: #294363;
   --button-hover-bg: #335278;
   --default-button-bg: #a8ccff;
@@ -40,9 +22,59 @@ html[data-theme="dark"] {
   --default-button-fg: #172d50;
   --body-bg: #0b1426;
   --body-fg: #eff5ff;
+  --body-quiet-color: #b6c7df;
+  --body-medium-color: #dce8fb;
+  --body-loud-color: #ffffff;
   --darkened-bg: #14243e;
+  --selected-bg: #1b2f4e;
+  --selected-row: #1e3a62;
   --hairline-color: #243b5e;
   --border-color: #314b74;
+  --error-fg: #ffb9a5;
+  --message-success-bg: #0b5d22;
+  --message-warning-bg: #583305;
+  --message-error-bg: #570808;
+  --close-button-bg: #294363;
+  --close-button-hover-bg: #335278;
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  --primary: #183f7d;
+  --secondary: #102a56;
+  --accent: #e5edf9;
+  --primary-fg: #ffffff;
+  --header-bg: #102a56;
+  --header-color: #dbe5f4;
+  --header-link-color: #eff3fa;
+  --breadcrumbs-bg: #193967;
+  --breadcrumbs-fg: #dbe5f4;
+  --breadcrumbs-link-fg: #eff3fa;
+  --link-fg: #183f7d;
+  --link-hover-color: #102a56;
+  --link-selected-fg: #254879;
+  --button-bg: #183f7d;
+  --button-hover-bg: #123163;
+  --default-button-bg: #102a56;
+  --default-button-hover-bg: #183f7d;
+  --default-button-fg: #ffffff;
+  --body-bg: #f3f6fb;
+  --body-fg: #172d50;
+  --body-quiet-color: #526177;
+  --body-medium-color: #2a4163;
+  --body-loud-color: #102a56;
+  --darkened-bg: #edf2fa;
+  --selected-bg: #e5edf9;
+  --selected-row: #dce6f7;
+  --hairline-color: #e2e9f4;
+  --border-color: #ced8e8;
+  --error-fg: #a04637;
+  --message-success-bg: #1d6b38;
+  --message-warning-bg: #805a0b;
+  --message-error-bg: #a64a38;
+  --close-button-bg: #dce6f7;
+  --close-button-hover-bg: #c0cde1;
+  color-scheme: light;
 }
 
 body {
