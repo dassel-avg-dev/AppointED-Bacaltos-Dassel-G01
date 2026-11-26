@@ -54,12 +54,12 @@
       <form method="post" action="{% url 'set_theme' %}">{% csrf_token %}
         <input type="hidden" name="next" value="{{ request.get_full_path }}">
         {% if theme == 'dark' %}
-          <button type="submit" name="theme" value="light" class="auth-theme-pill">
-            {% icon "sun" "w-4 h-4" %}<span>Dark theme · Switch to light</span>
+          <button type="submit" name="theme" value="light" class="topbar-icon-btn" title="Switch to light mode" aria-label="Switch to light mode">
+            {% icon "sun" "w-5 h-5" %}
           </button>
         {% else %}
-          <button type="submit" name="theme" value="dark" class="auth-theme-pill">
-            {% icon "moon" "w-4 h-4" %}<span>Light theme · Switch to dark</span>
+          <button type="submit" name="theme" value="dark" class="topbar-icon-btn" title="Switch to dark mode" aria-label="Switch to dark mode">
+            {% icon "moon" "w-5 h-5" %}
           </button>
         {% endif %}
       </form>

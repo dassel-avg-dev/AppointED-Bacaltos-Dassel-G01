@@ -795,19 +795,22 @@ textarea.input, .textarea-box { min-height: 112px; resize: vertical; }
   gap: 6px;
 }
 .password-wrap { position: relative; display: flex; align-items: center; }
-.password-wrap .input { padding-right: 68px; }
+.password-wrap .input { padding-right: 46px; }
 .password-toggle-btn {
   position: absolute;
   right: 6px;
-  min-height: 32px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--ink-label);
-  background-color: var(--surface-soft);
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-muted);
+  background-color: transparent;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
-.password-toggle-btn:hover { background-color: var(--btn-soft-hover); }
+.password-toggle-btn svg { display: block; flex-shrink: 0; }
+.password-toggle-btn:hover { background-color: var(--btn-soft-bg); color: var(--ink-primary); }
 .alert-error {
   background-color: var(--alert-error-bg);
   color: var(--alert-error-ink);
@@ -945,6 +948,12 @@ textarea.input, .textarea-box { min-height: 112px; resize: vertical; }
   border: 1px solid var(--border-subtle);
 }
 .auth-theme-pill:hover { background-color: var(--btn-soft-hover); }
+.auth-topbar .topbar-icon-btn {
+  background-color: var(--btn-soft-bg);
+  border: 1px solid var(--border-subtle);
+  color: var(--ink-primary);
+}
+.auth-topbar .topbar-icon-btn:hover { background-color: var(--btn-soft-hover); }
 .auth-form-wrap { width: 100%; max-width: 492px; margin: auto 0; padding: 20px 0; }
 .auth-form-title { font-family: var(--font-serif); font-size: 35px; font-weight: 400; margin: 0 0 8px 0; color: var(--ink-primary); }
 .auth-form-sub { font-size: 14px; color: var(--ink-muted); margin: 0 0 24px 0; text-wrap: pretty; }
@@ -1128,7 +1137,10 @@ html[data-theme="dark"] input:checked + .role-choice-pill {
 }
 .modal-overlay:target,
 .modal-overlay.is-open { display: flex; }
+.modal-backdrop-link { position: fixed; inset: 0; z-index: 0; }
 .modal-dialog {
+  position: relative;
+  z-index: 1;
   background-color: var(--surface);
   border: 1px solid var(--border-subtle);
   border-radius: 12px;

@@ -3,6 +3,7 @@
   {% icon icon_name|default:"x" "w-4 h-4" %}<span>{{ trigger }}</span>
 </a>
 <div id="{{ id }}" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title-{{ id }}">
+  <a href="#_" class="modal-backdrop-link" aria-label="Close confirmation dialog" tabindex="-1"></a>
   <div class="modal-dialog">
     <div><span class="pill-confirm">PLEASE CONFIRM</span></div>
     <h2 id="modal-title-{{ id }}" class="modal-title">{{ title }}</h2>

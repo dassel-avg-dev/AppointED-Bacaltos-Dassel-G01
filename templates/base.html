@@ -61,6 +61,123 @@
       </div>
     </div>
   {% endblock %}
-  <script src="{% static 'js/appointed.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script>
+    $(function () {
+      var EYE_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+      var EYE_OFF_SVG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
+      $('input[type="password"]').each(function () {
+        var $input = $(this);
+        if (!$input.parent('.password-wrap').length) {
+          $input.wrap('<div class="password-wrap"></div>');
+        }
+        var $btn = $('<button type="button" class="password-toggle-btn" title="Show password" aria-label="Show password"></button>').html(EYE_SVG);
+        $btn.on('click', function () {
+          var show = $input.attr('type') === 'password';
+          var label = show ? 'Hide password' : 'Show password';
+          $input.attr('type', show ? 'text' : 'password');
+          $btn.attr({ title: label, 'aria-label': label }).html(show ? EYE_OFF_SVG : EYE_SVG);
+        });
+        $input.after($btn);
+      });
+
+      var $purpose = $('#id_purpose');
+      var $counter = $('#purpose-counter');
+      if ($purpose.length && $counter.length) {
+        var max = parseInt($purpose.attr('maxlength'), 10) || 255;
+        var updateCounter = function () {
+          var val = $purpose.val() || '';
+          $counter.text(val.length + ' / ' + max);
+        };
+        updateCounter();
+        $purpose.on('input', updateCounter);
+      }
+
+      var FOCUSABLE = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      var $activeModal = null;
+      var $lastTrigger = null;
+
+      function openModal($modal, $trigger) {
+        $lastTrigger = $trigger || $(document.activeElement);
+        $activeModal = $modal.addClass('is-open');
+        var $target = $modal.find('[data-modal-safe]').first();
+        if (!$target.length) {
+          $target = $modal.find('.modal-dialog').find(FOCUSABLE).filter(':visible').first();
+        }
+        $target.trigger('focus');
+      }
+
+      function closeModal() {
+        if (!$activeModal) return;
+        var id = $activeModal.attr('id');
+        $activeModal.removeClass('is-open');
+        if (id && window.location.hash === '#' + id && window.history && window.history.replaceState) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+        if ($lastTrigger && $lastTrigger.length) {
+          $lastTrigger.trigger('focus');
+        }
+        $activeModal = null;
+        $lastTrigger = null;
+      }
+
+      $(document).on('click', '[data-modal-target]', function (e) {
+        var $modal = $('#' + $(this).data('modalTarget'));
+        if ($modal.length) {
+          e.preventDefault();
+          openModal($modal, $(this));
+        }
+      });
+
+      $(document).on('click', '[data-modal-close], .modal-backdrop-link', function (e) {
+        if ($activeModal) {
+          e.preventDefault();
+          closeModal();
+        }
+      });
+
+      $(document).on('click', '.modal-overlay', function (e) {
+        if (e.target === this) {
+          e.preventDefault();
+          closeModal();
+        }
+      });
+
+      $(document).on('keydown', function (e) {
+        if (!$activeModal) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          closeModal();
+          return;
+        }
+        if (e.key === 'Tab') {
+          var $focusables = $activeModal.find('.modal-dialog').find(FOCUSABLE).filter(':visible');
+          if (!$focusables.length) return;
+          var first = $focusables[0];
+          var last = $focusables[$focusables.length - 1];
+          if (e.shiftKey && document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          } else if (!e.shiftKey && document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      });
+
+      $(document).on('keydown', '[role="tablist"] [role="tab"]', function (e) {
+        if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+        var $tabs = $(this).closest('[role="tablist"]').find('[role="tab"]');
+        var idx = $tabs.index(this);
+        if (idx < 0 || !$tabs.length) return;
+        e.preventDefault();
+        var next = e.key === 'ArrowRight'
+          ? (idx + 1) % $tabs.length
+          : (idx - 1 + $tabs.length) % $tabs.length;
+        $tabs.eq(next).trigger('focus');
+      });
+    });
+  </script>
 </body>
 </html>

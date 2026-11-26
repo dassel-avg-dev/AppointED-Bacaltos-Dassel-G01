@@ -99,7 +99,8 @@ class UIPolishTests(TestCase):
         self.assertContains(r_login, "logo-mark.svg")
         self.assertContains(r_login, "logo-mark-inverse.svg")
         self.assertContains(r_login, "appointed.css")
-        self.assertContains(r_login, "appointed.js")
+        self.assertContains(r_login, "code.jquery.com/jquery-3.7.1.min.js")
+        self.assertNotContains(r_login, "appointed.js")
 
         self.client.force_login(self.f)
         r_dash = self.client.get(reverse("scheduling:dashboard"))
