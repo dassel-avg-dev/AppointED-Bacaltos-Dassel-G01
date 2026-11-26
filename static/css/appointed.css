@@ -1205,3 +1205,56 @@ html[data-theme="dark"] input:checked + .role-choice-pill {
     scroll-behavior: auto !important;
   }
 }
+
+/* Custom Admin Panel Data Tables & Filters */
+.admin-filter-4col {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(0, 0.9fr)) auto;
+  gap: 12px;
+  align-items: end;
+}
+.data-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.data-table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  color: var(--ink-body);
+}
+.data-table tbody tr:last-child td { border-bottom: none; }
+.data-table tbody tr:hover td { background-color: var(--surface-soft); }
+.checkbox-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-body);
+  cursor: pointer;
+}
+.checkbox-row input[type="checkbox"] { width: 16px; height: 16px; }
+@media (max-width: 1040px) {
+  .admin-filter-4col { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 720px) {
+  .admin-filter-4col { grid-template-columns: 1fr; }
+}

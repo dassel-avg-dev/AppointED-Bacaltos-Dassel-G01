@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Appointments · Admin Panel · AppointED{% endblock %}
+{% block content %}
+<div class="page-header-copy">
+  <h1 class="page-title">All appointments</h1>
+  <p class="page-subtitle">Monitor and manage every consultation across all departments.</p>
+</div>
+
+<form method="get" class="card history-filter-grid">
+  {% if active_status %}<input type="hidden" name="status" value="{{ active_status }}">{% endif %}
+  <div class="field">
+    <label class="field-label" for="id_a_q">Search appointments</label>
+    <input id="id_a_q" type="text" name="q" value="{{ query }}" placeholder="Student, faculty, email, or purpose..." class="input">
+  </div>
+  <div class="field">
+    <label class="field-label" for="id_a_type">Appointment type</label>
+    <select id="id_a_type" name="type" class="input">
+      <option value="">All types</option>
+      {% for t in appointment_types %}
+        <option value="{{ t.pk }}" {% if selected_type == t.pk|stringformat:"s" %}selected{% endif %}>{{ t.type_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="action-row">
+    <button type="submit" class="btn btn-primary" style="height:44px;">Filter</button>
+    {% if query or selected_type %}
+      <a href="{% url 'admin_panel:appointment_list' %}{% if active_status %}?status={{ active_status }}{% endif %}" class="btn btn-soft" style="height:44px;">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+<div class="tabs-bar" role="tablist" aria-label="Filter appointments by status">
+  {% for code, label, count in tabs %}
+    <a href="{% url 'admin_panel:appointment_list' %}{% if code and base_query %}?status={{ code }}&amp;{{ base_query }}{% elif code %}?status={{ code }}{% elif base_query %}?{{ base_query }}{% endif %}"
+       role="tab"
+       aria-selected="{% if active_status == code %}true{% else %}false{% endif %}"
+       class="tab-pill-btn {% if active_status == code %}active{% endif %}">
+      <span>{{ label }}</span>
+      <span>{{ count }}</span>
+    </a>
+  {% endfor %}
+</div>
+
+<div class="stack-12">
+  {% for a in appointments %}
+    <article class="history-item-card">
+      <div class="history-item-main stack-12" style="gap:6px;">
+        <div class="action-row" style="gap:10px;">
+          <span class="page-kicker">#{{ a.pk }}</span>
+          <span class="field-help">{{ a.type }}</span>
+          {% status_badge a.status %}
+        </div>
+        <a href="{% url 'admin_panel:appointment_detail' a.pk %}" class="appt-name">
+          {{ a.student.full_name }} &nbsp;→&nbsp; {{ a.slot.faculty.full_name }}
+        </a>
+        <p class="appt-time">{% slot_when a.slot %}</p>
+        <p class="appt-purpose">{{ a.purpose }}</p>
+      </div>
+      <div class="history-item-right">
+        {% include "admin_panel/_actions.html" with appt=a actions=a.actions next=request.get_full_path show_details=True %}
+      </div>
+    </article>
+  {% empty %}
+    <div class="card stack-12" style="padding:36px;">
+      <h2 class="section-title">No appointments in this view</h2>
+      <p class="page-subtitle">Adjust the status tab or search term to view other records.</p>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}{% if is_edit %}Edit Time Slot{% else %}Add Time Slot{% endif %} · Admin Panel · AppointED{% endblock %}
+{% block content %}
+<div class="page-header-copy">
+  <a href="{% url 'admin_panel:slot_list' %}" class="back-link">{% icon "arrow-left" "w-4 h-4" %}<span>Back to Time Slots</span></a>
+  <h1 class="page-title">{% if is_edit %}Edit time slot{% else %}Add time slot{% endif %}</h1>
+  <p class="page-subtitle">{% if is_edit %}Update this open faculty slot. Booked slots cannot be edited.{% else %}Publish an open consultation window on behalf of a faculty member.{% endif %}</p>
+</div>
+
+<div class="split-editor-grid">
+  <form method="post" class="card card-lg stack-20">{% csrf_token %}
+    <h2 class="section-title">Slot details</h2>
+    {% if form.non_field_errors %}
+      <div class="alert-error" role="alert">
+        <strong>This slot could not be saved.</strong>
+        {% for err in form.non_field_errors %}<p style="margin:4px 0 0 0;">{{ err }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    {% include "_field.html" with f=form.faculty %}
+    {% include "_field.html" with f=form.slot_date %}
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+      {% include "_field.html" with f=form.start_time %}
+      {% include "_field.html" with f=form.end_time %}
+    </div>
+    <p class="field-help">All times are in Philippine time (UTC+08:00).</p>
+
+    <div class="action-row">
+      <button type="submit" class="btn btn-primary">{% icon "check" "w-4 h-4" %}<span>{% if is_edit %}Save changes{% else %}Save slot{% endif %}</span></button>
+      <a href="{% url 'admin_panel:slot_list' %}" class="btn btn-soft">Cancel</a>
+    </div>
+  </form>
+
+  <aside class="card-tint stack-16">
+    <h2 class="font-serif" style="font-size:23px;margin:0;">Availability rules</h2>
+    <p style="font-size:13px;font-weight:500;margin:0;">01 &nbsp;Must belong to an active Faculty account.</p>
+    <p style="font-size:13px;font-weight:500;margin:0;">02 &nbsp;Date &amp; time must be in the future and end after start.</p>
+    <p style="font-size:13px;font-weight:500;margin:0;">03 &nbsp;Cannot overlap the faculty member’s existing slots.</p>
+    {% if is_edit and slot %}
+      <div class="affected-box">
+        <p style="margin:0 0 4px 0;font-weight:600;font-size:12px;">Original slot</p>
+        <p style="margin:0;font-size:12px;">{{ slot.faculty.full_name }}</p>
+        <p style="margin:2px 0 0 0;font-size:12px;color:var(--ink-muted);">{% slot_when slot %}</p>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

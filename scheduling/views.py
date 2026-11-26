@@ -30,7 +30,7 @@ def _appointments_for(user):
 def dashboard(request):
     user = request.user
     if user.is_admin_role:
-        return redirect("admin:index")
+        return redirect("admin_panel:overview")
     appts = list(_appointments_for(user))
     if user.is_faculty:
         for a in appts:
@@ -218,7 +218,7 @@ def book(request, slot_id):
 @login_required
 def appointment_list(request):
     if request.user.is_admin_role:
-        return redirect("admin:index")
+        return redirect("admin_panel:appointment_list")
     query = request.GET.get("q", "").strip()
     selected_type = request.GET.get("type", "").strip()
     qs = _appointments_for(request.user)

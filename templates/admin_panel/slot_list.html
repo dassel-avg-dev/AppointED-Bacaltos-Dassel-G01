@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Time Slots · Admin Panel · AppointED{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="page-header-copy">
+    <h1 class="page-title">Faculty time slots</h1>
+    <p class="page-subtitle">Review and manage consultation availability across all faculty members.</p>
+  </div>
+  <a href="{% url 'admin_panel:slot_create' %}" class="btn btn-primary">+&nbsp;&nbsp;Add time slot</a>
+</div>
+
+<form method="get" class="card admin-filter-4col">
+  <div class="field">
+    <label class="field-label" for="id_s_fac">Faculty</label>
+    <select id="id_s_fac" name="faculty" class="input">
+      <option value="">All faculty</option>
+      {% for f in faculty_members %}
+        <option value="{{ f.pk }}" {% if selected_faculty == f.pk|stringformat:"s" %}selected{% endif %}>{{ f.full_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label class="field-label" for="id_s_dept">Department</label>
+    <select id="id_s_dept" name="department" class="input">
+      <option value="">All departments</option>
+      {% for d in departments %}
+        <option value="{{ d.pk }}" {% if selected_department == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label class="field-label" for="id_s_state">State</label>
+    <select id="id_s_state" name="state" class="input">
+      <option value="">All states</option>
+      <option value="open" {% if state_filter == 'open' %}selected{% endif %}>Open</option>
+      <option value="booked" {% if state_filter == 'booked' %}selected{% endif %}>Booked</option>
+      <option value="past" {% if state_filter == 'past' %}selected{% endif %}>Past</option>
+    </select>
+  </div>
+  <div></div>
+  <div class="action-row">
+    <button type="submit" class="btn btn-primary" style="height:44px;">Filter</button>
+    {% if selected_faculty or selected_department or state_filter %}
+      <a href="{% url 'admin_panel:slot_list' %}" class="btn btn-soft" style="height:44px;">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+{% regroup rows by slot_date as day_groups %}
+<div class="stack-20">
+  {% for day in day_groups %}
+    <section class="stack-12">
+      <div style="display:flex;align-items:baseline;gap:10px;">
+        <h2 style="font-size:17px;font-weight:500;margin:0;color:var(--ink-primary);">{{ day.grouper|friendly_day }}</h2>
+        <span class="field-help">{{ day.grouper|date:"D, j M Y" }}</span>
+      </div>
+      {% for r in day.list %}
+        <article class="slot-row {% if r.state == 'past' %}past{% endif %}">
+          <div class="slot-row-info">
+            <p class="appt-name">{% slot_time r.slot %} &nbsp;·&nbsp; {{ r.slot.faculty.full_name }}</p>
+            <p class="appt-type">
+              {{ r.slot.faculty.department|default:"No department" }}
+              {% if r.active %}
+                &nbsp;·&nbsp; Booked by <a href="{% url 'admin_panel:appointment_detail' r.active.pk %}" style="text-decoration:underline;">{{ r.active.student.full_name }}</a>
+              {% elif r.state == 'past' %}
+                &nbsp;·&nbsp; Past window
+              {% else %}
+                &nbsp;·&nbsp; Open for booking
+              {% endif %}
+            </p>
+          </div>
+          <div class="slot-row-state">
+            {% if r.active %}
+              {% status_badge r.active.status %}
+            {% elif r.state == 'past' %}
+              <span class="pill pill-neutral">Past</span>
+            {% else %}
+              <span class="pill pill-open"><span class="pill-dot" aria-hidden="true"></span>Open</span>
+            {% endif %}
+          </div>
+          <div class="slot-row-actions">
+            {% if r.active %}
+              <a href="{% url 'admin_panel:appointment_detail' r.active.pk %}" class="btn btn-soft btn-sm">View appointment →</a>
+            {% endif %}
+            {% if r.deletable %}
+              {% if not r.slot.has_started %}
+                <a href="{% url 'admin_panel:slot_edit' r.slot.pk %}" class="btn btn-soft btn-sm">Edit</a>
+              {% endif %}
+              {% url 'admin_panel:slot_delete' r.slot.pk as del_url %}
+              {% with sid=r.slot.pk|stringformat:"s" %}
+                {% include "_confirm.html" with id="admin-del-slot-"|add:sid trigger="Delete" icon_name="trash" title="Delete this time slot?" body="This open time slot will be permanently removed from the faculty member’s schedule." context_title=r.slot.faculty.full_name context_sub=r.slot action=del_url confirm="Delete slot" %}
+              {% endwith %}
+            {% endif %}
+          </div>
+        </article>
+      {% endfor %}
+    </section>
+  {% empty %}
+    <div class="card stack-12" style="padding:36px;">
+      <h2 class="section-title">No time slots found</h2>
+      <p class="page-subtitle">No slots match the current filters.</p>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

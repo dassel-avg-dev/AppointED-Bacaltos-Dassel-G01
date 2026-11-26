@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Catalog · Admin Panel · AppointED{% endblock %}
+{% block content %}
+<div class="page-header-copy">
+  <h1 class="page-title">Campus catalog</h1>
+  <p class="page-subtitle">Manage university departments and consultation appointment types.</p>
+</div>
+
+<div class="tabs-bar" style="grid-template-columns:repeat(2,minmax(0,220px));" role="tablist" aria-label="Catalog sections">
+  <a href="{% url 'admin_panel:department_list' %}" role="tab" aria-selected="{% if section == 'departments' %}true{% else %}false{% endif %}" class="tab-pill-btn {% if section == 'departments' %}active{% endif %}">
+    <span>Departments</span>
+  </a>
+  <a href="{% url 'admin_panel:type_list' %}" role="tab" aria-selected="{% if section == 'types' %}true{% else %}false{% endif %}" class="tab-pill-btn {% if section == 'types' %}active{% endif %}">
+    <span>Appointment Types</span>
+  </a>
+</div>
+
+<div class="split-editor-grid">
+  <section class="card" style="padding:0;">
+    <div class="data-table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>{% if section == 'departments' %}Department{% else %}Appointment Type{% endif %}</th>
+            <th>{% if section == 'departments' %}Assigned Users{% else %}Appointments{% endif %}</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if section == 'departments' %}
+            {% for d in departments %}
+              <tr>
+                <td style="font-weight:600;color:var(--ink-primary);">{{ d.name }}</td>
+                <td>{{ d.user_count }}</td>
+                <td>
+                  <div class="action-row" style="justify-content:flex-end;">
+                    <a href="{% url 'admin_panel:department_list' %}?edit={{ d.pk }}" class="btn btn-soft btn-sm">Edit</a>
+                    {% url 'admin_panel:department_delete' d.pk as del_url %}
+                    {% with did=d.pk|stringformat:"s" %}
+                      {% include "_confirm.html" with id="del-dept-"|add:did trigger="Delete" icon_name="trash" title="Delete department?" body="Users assigned to this department will have their department cleared." context_title=d.name action=del_url confirm="Delete department" %}
+                    {% endwith %}
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" style="padding:28px;text-align:center;color:var(--ink-muted);">No departments yet.</td></tr>
+            {% endfor %}
+          {% else %}
+            {% for t in types %}
+              <tr>
+                <td style="font-weight:600;color:var(--ink-primary);">{{ t.type_name }}</td>
+                <td>{{ t.appt_count }}</td>
+                <td>
+                  <div class="action-row" style="justify-content:flex-end;">
+                    <a href="{% url 'admin_panel:type_list' %}?edit={{ t.pk }}" class="btn btn-soft btn-sm">Edit</a>
+                    {% url 'admin_panel:type_delete' t.pk as del_url %}
+                    {% with tid=t.pk|stringformat:"s" %}
+                      {% include "_confirm.html" with id="del-type-"|add:tid trigger="Delete" icon_name="trash" title="Delete appointment type?" body="Appointment types referenced by existing appointments cannot be deleted." context_title=t.type_name action=del_url confirm="Delete type" %}
+                    {% endwith %}
+                  </div>
+                </td>
+              </tr>
+            {% empty %}
+              <tr><td colspan="3" style="padding:28px;text-align:center;color:var(--ink-muted);">No appointment types yet.</td></tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <form method="post" class="card card-lg stack-16">{% csrf_token %}
+    {% if edit_obj %}<input type="hidden" name="edit_id" value="{{ edit_obj.pk }}">{% endif %}
+    <h2 class="section-title">
+      {% if edit_obj %}
+        Edit {% if section == 'departments' %}department{% else %}type{% endif %}
+      {% else %}
+        Add {% if section == 'departments' %}department{% else %}type{% endif %}
+      {% endif %}
+    </h2>
+    {% for f in form %}{% include "_field.html" %}{% endfor %}
+    <div class="action-row">
+      <button type="submit" class="btn btn-primary">{% if edit_obj %}Save changes{% else %}Add{% endif %}</button>
+      {% if edit_obj %}
+        <a href="{% if section == 'departments' %}{% url 'admin_panel:department_list' %}{% else %}{% url 'admin_panel:type_list' %}{% endif %}" class="btn btn-soft">Cancel</a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+{% endblock %}

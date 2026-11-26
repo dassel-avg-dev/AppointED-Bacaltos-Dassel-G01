@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Audit Logs · Admin Panel · AppointED{% endblock %}
+{% block content %}
+<div class="page-header-copy">
+  <h1 class="page-title">Audit logs</h1>
+  <p class="page-subtitle">Read-only chronological record of appointment status transitions (showing latest 100 entries).</p>
+</div>
+
+<form method="get" class="card history-filter-grid">
+  <div class="field">
+    <label class="field-label" for="id_l_q">Search logs</label>
+    <input id="id_l_q" type="text" name="q" value="{{ query }}" placeholder="Student, faculty, actor, or purpose..." class="input">
+  </div>
+  <div class="field">
+    <label class="field-label" for="id_l_status">Target status</label>
+    <select id="id_l_status" name="status" class="input">
+      <option value="">All transitions</option>
+      {% for val, label in statuses %}
+        <option value="{{ val }}" {% if selected_status == val %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="action-row">
+    <button type="submit" class="btn btn-primary" style="height:44px;">Filter</button>
+    {% if query or selected_status %}
+      <a href="{% url 'admin_panel:audit_logs' %}" class="btn btn-soft" style="height:44px;">Clear</a>
+    {% endif %}
+  </div>
+</form>
+
+<section class="card" style="padding:0;">
+  <div class="data-table-wrap">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Timestamp</th>
+          <th>Appointment</th>
+          <th>Transition</th>
+          <th>Participants</th>
+          <th>Changed By</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for l in logs %}
+          <tr>
+            <td style="white-space:nowrap;">{{ l.changed_at|date:"M j, Y · g:i A" }}</td>
+            <td>
+              <a href="{% url 'admin_panel:appointment_detail' l.appointment_id %}" style="font-weight:600;color:var(--ink-primary);text-decoration:underline;">#{{ l.appointment_id }}</a>
+            </td>
+            <td>
+              <span class="field-help">{{ l.old_status|default:"(new)" }} →</span>
+              {% status_badge l.new_status %}
+            </td>
+            <td>{{ l.appointment.student.full_name }} → {{ l.appointment.slot.faculty.full_name }}</td>
+            <td>{{ l.changed_by.full_name|default:"System" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5" style="padding:32px;text-align:center;color:var(--ink-muted);">No matching audit log entries.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

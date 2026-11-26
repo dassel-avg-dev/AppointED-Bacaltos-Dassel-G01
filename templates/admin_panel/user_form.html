@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}{% if is_edit %}Edit User{% else %}New User{% endif %} · Admin Panel · AppointED{% endblock %}
+{% block content %}
+<div class="page-header-copy">
+  <a href="{% url 'admin_panel:user_list' %}" class="back-link">{% icon "arrow-left" "w-4 h-4" %}<span>Back to Users</span></a>
+  <h1 class="page-title">{% if is_edit %}Edit user{% else %}Create user{% endif %}</h1>
+  <p class="page-subtitle">{% if is_edit %}Update role, department, status, or reset password.{% else %}Provision a new Student, Faculty, or Administrator account.{% endif %}</p>
+</div>
+
+<div class="split-editor-grid">
+  <form method="post" class="card card-lg stack-20">{% csrf_token %}
+    <h2 class="section-title">Account details</h2>
+    {% if form.non_field_errors %}
+      <div class="alert-error" role="alert">
+        {% for err in form.non_field_errors %}<p style="margin:0;">{{ err }}</p>{% endfor %}
+      </div>
+    {% endif %}
+
+    {% include "_field.html" with f=form.full_name %}
+    {% include "_field.html" with f=form.email %}
+
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+      {% include "_field.html" with f=form.role %}
+      {% include "_field.html" with f=form.department %}
+    </div>
+
+    {% include "_field.html" with f=form.new_password %}
+
+    <div class="field">
+      <label class="checkbox-row">
+        {{ form.is_active }}
+        <span>Account is active (can sign in and appear in directory)</span>
+      </label>
+      {% for err in form.is_active.errors %}
+        <p class="field-error" role="alert">{% icon "exclamation" "w-4 h-4 shrink-0" %}<span>{{ err }}</span></p>
+      {% endfor %}
+    </div>
+
+    <div class="action-row">
+      <button type="submit" class="btn btn-primary">{% icon "check" "w-4 h-4" %}<span>{% if is_edit %}Save changes{% else %}Create account{% endif %}</span></button>
+      <a href="{% url 'admin_panel:user_list' %}" class="btn btn-soft">Cancel</a>
+    </div>
+  </form>
+
+  <aside class="card-tint stack-16">
+    <h2 class="font-serif" style="font-size:23px;margin:0;">Account permissions</h2>
+    <p style="font-size:13px;margin:0;"><strong>Student</strong> — Browse faculty directory, book open slots, cancel pending requests.</p>
+    <p style="font-size:13px;margin:0;"><strong>Faculty</strong> — Publish time slots, approve, complete, or cancel student appointments.</p>
+    <p style="font-size:13px;margin:0;"><strong>Administrator</strong> — Full access to this Admin Panel and classic Django Admin.</p>
+    {% if is_edit and target_user %}
+      <div class="affected-box">
+        <p style="margin:0 0 4px 0;font-weight:600;font-size:12px;">Account ID #{{ target_user.pk }}</p>
+        <p style="margin:0;font-size:12px;color:var(--ink-muted);">Created {{ target_user.created_at|date:"M j, Y · g:i A" }}</p>
+      </div>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
