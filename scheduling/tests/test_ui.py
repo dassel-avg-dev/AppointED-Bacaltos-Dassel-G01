@@ -103,6 +103,11 @@ class UIPolishTests(TestCase):
         self.assertNotContains(r_login, "appointed.js")
 
         self.client.force_login(self.f)
-        r_dash = self.client.get(reverse("scheduling:dashboard"))
-        self.assertContains(r_dash, "logo-mark-inverse.svg")
-        self.assertContains(r_dash, f"Good morning, {self.f.full_name}.")
+        r_dash_light = self.client.get(reverse("scheduling:dashboard"))
+        self.assertContains(r_dash_light, 'logo-mark.svg" alt="" class="mobile-brand-mark"')
+        self.assertContains(r_dash_light, "logo-mark-inverse.svg")
+        self.assertContains(r_dash_light, f"Good morning, {self.f.full_name}.")
+
+        self.client.cookies["theme"] = "dark"
+        r_dash_dark = self.client.get(reverse("scheduling:dashboard"))
+        self.assertContains(r_dash_dark, 'logo-mark-inverse.svg" alt="" class="mobile-brand-mark"')

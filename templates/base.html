@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}AppointED{% endblock %}</title>
-  <link rel="icon" type="image/svg+xml" href="{% static 'img/logo-mark.svg' %}">
+  <link rel="icon" type="image/svg+xml" href="{% if theme == 'dark' %}{% static 'img/logo-mark-inverse.svg' %}{% else %}{% static 'img/logo-mark.svg' %}{% endif %}">
   {% include "_styles.html" %}
 </head>
 <body>
@@ -15,7 +15,7 @@
         <header class="topbar">
           <div class="topbar-left">
             <a href="{% if user.is_authenticated %}{% url 'scheduling:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="mobile-brand">
-              <img src="{% static 'img/logo-mark.svg' %}" alt="" class="mobile-brand-mark">
+              <img src="{% if theme == 'dark' %}{% static 'img/logo-mark-inverse.svg' %}{% else %}{% static 'img/logo-mark.svg' %}{% endif %}" alt="" class="mobile-brand-mark">
               <span>AppointED</span>
             </a>
             <span class="topbar-breadcrumb">
