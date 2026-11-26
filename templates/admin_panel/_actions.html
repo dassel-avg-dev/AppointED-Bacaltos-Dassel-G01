@@ -1,0 +1,26 @@
+{% load ui %}
+<div class="action-row">
+  {% if show_complete_hint and appt.status == 'APPROVED' and 'COMPLETED' not in actions %}
+    <span class="helper-inline">Complete after session</span>
+  {% endif %}
+  {% for s in actions %}
+    {% if s == 'CANCELLED' %}
+      {% url 'admin_panel:appointment_status' appt.pk as cancel_url %}
+      {% with modal_id=appt.pk|stringformat:"s" %}
+        {% include "_confirm.html" with id="admin-cancel-"|add:modal_id trigger="Cancel" icon_name="x" title="Cancel this appointment?" body="This marks the appointment as Cancelled, writes an audit log entry, and reopens the slot." context_title=appt.type context_sub=appt.slot action=cancel_url status="CANCELLED" next=next confirm="Yes, cancel appointment" %}
+      {% endwith %}
+    {% else %}
+      <form method="post" action="{% url 'admin_panel:appointment_status' appt.pk %}" style="display:inline;">{% csrf_token %}
+        <input type="hidden" name="next" value="{{ next }}">
+        {% if s == 'APPROVED' %}
+          <button type="submit" name="status" value="APPROVED" class="btn btn-primary btn-sm">{% icon "check" "w-4 h-4" %}<span>Approve</span></button>
+        {% elif s == 'COMPLETED' %}
+          <button type="submit" name="status" value="COMPLETED" class="btn btn-primary btn-sm">{% icon "check-circle" "w-4 h-4" %}<span>Complete</span></button>
+        {% endif %}
+      </form>
+    {% endif %}
+  {% endfor %}
+  {% if show_details %}
+    <a href="{% url 'admin_panel:appointment_detail' appt.pk %}" class="btn btn-soft btn-sm">Details →</a>
+  {% endif %}
+</div>

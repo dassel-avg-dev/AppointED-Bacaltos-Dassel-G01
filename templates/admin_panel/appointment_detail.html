@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block title %}Appointment #{{ appt.pk }} · Admin Panel · AppointED{% endblock %}
+{% block content %}
+<div class="page-header-copy">
+  <a href="{% url 'admin_panel:appointment_list' %}" class="back-link">{% icon "arrow-left" "w-4 h-4" %}<span>Back to Appointments</span></a>
+  <div class="page-header" style="align-items:center;">
+    <div>
+      <p class="page-kicker" style="margin-bottom:6px;">Appointment #{{ appt.pk }}</p>
+      <h1 class="page-title">{{ appt.type }}</h1>
+    </div>
+    {% status_badge appt.status %}
+  </div>
+  <p class="page-subtitle">Full appointment record and read-only status audit trail.</p>
+</div>
+
+<div class="split-detail-grid">
+  <div class="stack-16">
+    <section class="card card-lg stack-16">
+      <h2 class="section-title">Appointment details</h2>
+      <dl style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin:0;">
+        <div>
+          <dt class="page-kicker" style="margin-bottom:4px;">Student</dt>
+          <dd style="font-size:14px;font-weight:500;margin:0;">{{ appt.student.full_name }}</dd>
+          <p class="field-help">{{ appt.student.email }}</p>
+        </div>
+        <div>
+          <dt class="page-kicker" style="margin-bottom:4px;">Faculty</dt>
+          <dd style="font-size:14px;font-weight:500;margin:0;">{{ appt.slot.faculty.full_name }}</dd>
+          <p class="field-help">{{ appt.slot.faculty.email }}</p>
+        </div>
+        <div style="grid-column:1 / -1;">
+          <dt class="page-kicker" style="margin-bottom:4px;">When</dt>
+          <dd style="font-size:14px;font-weight:500;margin:0;">{% slot_when appt.slot %}</dd>
+          <p class="field-help" style="margin-top:4px;">Philippine time (UTC+08:00)</p>
+        </div>
+        <div style="grid-column:1 / -1;">
+          <dt class="page-kicker" style="margin-bottom:4px;">Requested</dt>
+          <dd style="font-size:14px;font-weight:500;margin:0;">{{ appt.created_at|date:"M j, Y · g:i A" }}</dd>
+        </div>
+        <div class="card-soft" style="grid-column:1 / -1;">
+          <dt class="page-kicker" style="margin-bottom:6px;">Purpose</dt>
+          <dd style="font-size:14px;margin:0;color:var(--ink-body);">{{ appt.purpose }}</dd>
+        </div>
+      </dl>
+    </section>
+
+    <section class="card-tint stack-12">
+      {% if actions %}
+        <h3 class="font-serif" style="font-size:18px;margin:0;">Admin actions</h3>
+        <p class="page-subtitle">Status changes are enforced by AppointED business rules and recorded in the audit log.</p>
+        <div style="padding-top:4px;">
+          {% include "admin_panel/_actions.html" with next="" show_complete_hint=True %}
+        </div>
+      {% else %}
+        <h3 class="font-serif" style="font-size:18px;margin:0;">
+          {% if appt.status == 'COMPLETED' %}Consultation completed.{% elif appt.status == 'CANCELLED' %}Appointment cancelled.{% else %}No actions available.{% endif %}
+        </h3>
+        <p class="page-subtitle">This record is preserved in the read-only audit trail.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  <aside class="card card-lg stack-12">
+    <h2 class="section-title">Status history</h2>
+    <p class="field-help">A chronological, read-only audit trail.</p>
+    <ol class="timeline-list">
+      {% for l in logs %}
+        <li class="timeline-item">
+          <div class="timeline-rail-col">
+            <span class="timeline-dot {% if l.new_status == 'PENDING' %}pending{% elif l.new_status == 'APPROVED' %}approved{% elif l.new_status == 'COMPLETED' %}completed{% else %}cancelled{% endif %}"></span>
+            {% if not forloop.last %}<span class="timeline-line"></span>{% endif %}
+          </div>
+          <div class="stack-12" style="gap:3px;padding-bottom:6px;">
+            <p style="font-size:13px;font-weight:600;margin:0;color:var(--ink-body);">{{ l.old_status|default:"(new)" }} → {{ l.new_status }}</p>
+            {% if l.changed_by %}
+              <p style="font-size:11px;font-weight:500;margin:0;color:var(--ink-muted);">by {{ l.changed_by.full_name }}</p>
+            {% endif %}
+            <p style="font-size:11px;margin:0;color:var(--ink-muted);">{{ l.changed_at|date:"M j, Y · g:i A" }}</p>
+          </div>
+        </li>
+      {% endfor %}
+    </ol>
+  </aside>
+</div>
+{% endblock %}
