@@ -2,13 +2,11 @@
 {% load ui %}
 {% block title %}Access Denied · AppointED{% endblock %}
 {% block content %}
-<div class="card max-w-md mx-auto p-8 text-center">
-  <div class="mx-auto w-14 h-14 rounded-2xl bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-300 inline-flex items-center justify-center mb-4">
-    {% icon "shield" "w-7 h-7" %}
-  </div>
-  <div class="text-xs font-semibold uppercase tracking-wide text-rose-600 dark:text-rose-400">403 · Access denied</div>
-  <h1 class="text-xl font-bold mt-1">You don't have access to this page</h1>
-  <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">
+<section class="error-center-card">
+  <div><span class="pill-confirm">403 · Access denied</span></div>
+  <p class="error-code">403</p>
+  <h1 class="page-title">You don't have access to this page</h1>
+  <p class="page-subtitle" style="font-size:14px;">
     {% if user.is_student %}
       This area is for faculty accounts. You are currently signed in as a Student.
     {% elif user.is_faculty %}
@@ -17,12 +15,17 @@
       You do not have permission to view this page.
     {% endif %}
   </p>
-  <div class="mt-6">
+  <div class="affected-box" style="background:var(--surface-tint);">
+    <p style="margin:0 0 4px 0;font-weight:600;">Why am I seeing this?</p>
+    <p style="margin:0;font-size:12px;color:var(--ink-tint);">Workspace routes are scoped by role so student schedules and faculty controls stay protected.</p>
+  </div>
+  <div class="action-row" style="padding-top:4px;">
     {% if user.is_authenticated %}
       <a href="{% url 'scheduling:dashboard' %}" class="btn btn-primary">{% icon "home" "w-4 h-4" %}<span>Go to my dashboard</span></a>
+      <a href="{% url 'scheduling:appointment_list' %}" class="btn btn-soft">View History</a>
     {% else %}
       <a href="{% url 'accounts:login' %}" class="btn btn-primary">Log in</a>
     {% endif %}
   </div>
-</div>
+</section>
 {% endblock %}

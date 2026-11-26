@@ -2,69 +2,84 @@
 {% load ui %}
 {% block title %}Student Dashboard · AppointED{% endblock %}
 {% block content %}
-<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-  <div>
-    <h1 class="text-2xl font-bold">Student Dashboard</h1>
-    <p class="text-sm text-slate-500 dark:text-slate-400">Track your upcoming consultations or book a new slot.</p>
+<div class="page-header">
+  <div class="page-header-copy">
+    <p class="page-kicker">{% now "l, j F Y"|upper %}</p>
+    <h1 class="page-title">Your next step starts here.</h1>
+    <p class="page-subtitle">Make time for questions. Leave with a little more clarity.</p>
   </div>
-  <a href="{% url 'scheduling:faculty_directory' %}" class="btn btn-primary">{% icon "plus" "w-4 h-4" %}<span>Book an appointment</span></a>
+  <a href="{% url 'scheduling:faculty_directory' %}" class="btn btn-primary">+&nbsp;&nbsp;Book appointment</a>
 </div>
 
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  <div class="card p-4 flex items-center gap-3.5">
-    <span class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-300 inline-flex items-center justify-center shrink-0">{% icon "clock" %}</span>
-    <div><div class="text-2xl font-bold">{{ pending_count }}</div><div class="text-xs text-slate-500 dark:text-slate-400">Pending</div></div>
+<div class="card-tint glance-banner">
+  <div class="glance-copy">
+    <h2>One conversation can change your semester.</h2>
+    <p>
+      {% if appointments %}
+        {{ approved_count }} approved session{{ approved_count|pluralize }} upcoming · {{ pending_count }} waiting for faculty review.
+      {% else %}
+        Browse real-time availability and find a time that works for you.
+      {% endif %}
+    </p>
   </div>
-  <div class="card p-4 flex items-center gap-3.5">
-    <span class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 inline-flex items-center justify-center shrink-0">{% icon "calendar" %}</span>
-    <div><div class="text-2xl font-bold">{{ approved_count }}</div><div class="text-xs text-slate-500 dark:text-slate-400">Approved</div></div>
-  </div>
-  <div class="card p-4 flex items-center gap-3.5">
-    <span class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 inline-flex items-center justify-center shrink-0">{% icon "check-circle" %}</span>
-    <div><div class="text-2xl font-bold">{{ completed_count }}</div><div class="text-xs text-slate-500 dark:text-slate-400">Completed</div></div>
-  </div>
-  <div class="card p-4 flex items-center gap-3.5">
-    <span class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 inline-flex items-center justify-center shrink-0">{% icon "clipboard" %}</span>
-    <div><div class="text-2xl font-bold">{{ total_count }}</div><div class="text-xs text-slate-500 dark:text-slate-400">Total booked</div></div>
+  <div class="glance-semester">
+    <p class="sem-label">CAMPUS CONSULTATIONS</p>
+    <p class="sem-value">{% now "Y" %}</p>
   </div>
 </div>
 
-<div class="flex items-center justify-between mb-3">
-  <h2 class="font-semibold">Active appointments</h2>
-  <a href="{% url 'scheduling:appointment_list' %}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">View full history</a>
+<div class="metrics-grid">
+  <div class="metric-card">
+    <p class="metric-value">{{ pending_count }}</p>
+    <p class="metric-label green">Pending</p>
+  </div>
+  <div class="metric-card">
+    <p class="metric-value">{{ approved_count }}</p>
+    <p class="metric-label green">Approved</p>
+  </div>
+  <div class="metric-card">
+    <p class="metric-value green">{{ completed_count }}</p>
+    <p class="metric-label green">Completed</p>
+  </div>
+  <div class="metric-card">
+    <p class="metric-value">{{ total_count }}</p>
+    <p class="metric-label">Total booked</p>
+  </div>
 </div>
 
-<div class="card divide-y divide-slate-200 dark:divide-slate-800">
-  {% for a in appointments %}
-    <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-      <a href="{% url 'scheduling:appointment_detail' a.pk %}" class="flex items-start gap-3 flex-1 min-w-0 group">
-        <span class="avatar w-10 h-10">{{ a.slot.faculty.full_name|initials }}</span>
-        <div class="min-w-0 flex-1">
-          <div class="flex flex-wrap items-center gap-2">
-            <span class="font-semibold group-hover:text-indigo-600 dark:group-hover:text-indigo-400">{{ a.slot.faculty.full_name }}</span>
-            <span class="text-xs text-slate-400">·</span>
-            <span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ a.type }}</span>
-          </div>
-          <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
-            {% icon "calendar" "w-4 h-4 shrink-0" %}<span>{% slot_when a.slot %}</span>
-          </div>
-          <p class="text-sm text-slate-600 dark:text-slate-300 mt-1 truncate">{{ a.purpose }}</p>
-        </div>
-      </a>
-      <div class="flex items-center gap-3">
-        {% status_badge a.status %}
-        {% if a.actions %}
-          {% include "scheduling/_actions.html" with appt=a actions=a.actions next=request.path %}
-        {% endif %}
+{% if appointments %}
+  <section class="card stack-16">
+    <div class="panel-header" style="margin-bottom:0;">
+      <div>
+        <h2 class="section-title">Upcoming appointments</h2>
+        <p class="section-sub">Active requests and confirmed sessions</p>
       </div>
+      <a href="{% url 'scheduling:appointment_list' %}" class="btn btn-soft">View all history →</a>
     </div>
-  {% empty %}
-    <div class="p-10 text-center text-sm text-slate-500 dark:text-slate-400">
-      <div class="mx-auto w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 inline-flex items-center justify-center mb-3">{% icon "calendar" "w-6 h-6" %}</div>
-      <p class="font-medium text-slate-700 dark:text-slate-300">No active appointments</p>
-      <p class="text-xs mt-1 mb-4">Browse available faculty consultation hours to request one.</p>
-      <a href="{% url 'scheduling:faculty_directory' %}" class="btn btn-primary btn-sm">{% icon "plus" "w-4 h-4" %}<span>Browse faculty</span></a>
+    <div class="stack-12">
+      {% for a in appointments %}
+        <article class="card-soft stack-12">
+          <div class="appt-row-head">
+            <div style="min-width:0;">
+              <a class="appt-name" href="{% url 'scheduling:appointment_detail' a.pk %}">{{ a.slot.faculty.full_name }} · {{ a.type }}</a>
+              <p class="appt-type">{{ a.slot.faculty.department|default:"Faculty consultation" }}</p>
+            </div>
+            {% status_badge a.status %}
+          </div>
+          <p class="appt-time">{% slot_when a.slot %}</p>
+          <p class="appt-purpose">{{ a.purpose }}</p>
+          {% include "scheduling/_actions.html" with appt=a actions=a.actions next=request.path show_details=True %}
+        </article>
+      {% endfor %}
     </div>
-  {% endfor %}
-</div>
+  </section>
+{% else %}
+  <section class="card stack-16" style="padding:40px 44px;">
+    <p class="page-kicker">YOUR SCHEDULE IS OPEN</p>
+    <h2 class="font-serif" style="font-size:33px;margin:0;">Let’s make a connection.</h2>
+    <p class="page-subtitle" style="font-size:14px;">You don’t have any active appointments yet. Explore faculty availability and book your first conversation.</p>
+    <div><a href="{% url 'scheduling:faculty_directory' %}" class="btn btn-primary">Browse Faculty Directory &nbsp;→</a></div>
+    <p class="field-help">Real-time open slots &nbsp;·&nbsp; No walk-in guesswork</p>
+  </section>
+{% endif %}
 {% endblock %}
