@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "accounts",
     "scheduling",
+    "admin_panel",
 ]
 
 MIDDLEWARE = [

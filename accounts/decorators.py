@@ -20,3 +20,4 @@ def _role_required(check):
 
 student_required = _role_required(lambda u: u.is_student)  # BR-06
 faculty_required = _role_required(lambda u: u.is_faculty)  # BR-05, BR-10
+admin_required = _role_required(lambda u: u.is_active and u.is_admin_role)

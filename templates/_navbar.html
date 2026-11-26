@@ -43,11 +43,26 @@
           {% icon "user" "w-5 h-5" %}<span>My Profile</span>
         </a>
       {% elif user.is_staff %}
-        <a href="{% url 'admin:index' %}" class="nav-item {% if cur != 'accounts:profile' %}active{% endif %}" {% if cur != 'accounts:profile' %}aria-current="page"{% endif %}>
-          {% icon "shield" "w-5 h-5" %}<span>Admin</span>
+        <a href="{% url 'admin_panel:overview' %}" class="nav-item {% if cur == 'admin_panel:overview' %}active{% endif %}" {% if cur == 'admin_panel:overview' %}aria-current="page"{% endif %}>
+          {% icon "grid" "w-5 h-5" %}<span>Overview</span>
+        </a>
+        <a href="{% url 'admin_panel:user_list' %}" class="nav-item {% if 'admin_panel:user' in cur %}active{% endif %}" {% if 'admin_panel:user' in cur %}aria-current="page"{% endif %}>
+          {% icon "user" "w-5 h-5" %}<span>Users</span>
+        </a>
+        <a href="{% url 'admin_panel:appointment_list' %}" class="nav-item {% if 'admin_panel:appointment' in cur %}active{% endif %}" {% if 'admin_panel:appointment' in cur %}aria-current="page"{% endif %}>
+          {% icon "clipboard" "w-5 h-5" %}<span>Appointments</span>
+        </a>
+        <a href="{% url 'admin_panel:slot_list' %}" class="nav-item {% if 'admin_panel:slot' in cur %}active{% endif %}" {% if 'admin_panel:slot' in cur %}aria-current="page"{% endif %}>
+          {% icon "calendar" "w-5 h-5" %}<span>Time Slots</span>
+        </a>
+        <a href="{% url 'admin_panel:department_list' %}" class="nav-item {% if cur == 'admin_panel:department_list' or cur == 'admin_panel:type_list' %}active{% endif %}" {% if cur == 'admin_panel:department_list' or cur == 'admin_panel:type_list' %}aria-current="page"{% endif %}>
+          {% icon "inbox" "w-5 h-5" %}<span>Catalog</span>
+        </a>
+        <a href="{% url 'admin_panel:audit_logs' %}" class="nav-item {% if cur == 'admin_panel:audit_logs' %}active{% endif %}" {% if cur == 'admin_panel:audit_logs' %}aria-current="page"{% endif %}>
+          {% icon "clock" "w-5 h-5" %}<span>Audit Logs</span>
         </a>
         <a href="{% url 'accounts:profile' %}" class="nav-item {% if cur == 'accounts:profile' %}active{% endif %}" {% if cur == 'accounts:profile' %}aria-current="page"{% endif %}>
-          {% icon "user" "w-5 h-5" %}<span>My Profile</span>
+          {% icon "shield" "w-5 h-5" %}<span>My Profile</span>
         </a>
       {% endif %}
     </nav>
@@ -102,11 +117,17 @@
       <button type="submit" class="mobile-nav-btn">{% icon "logout" "w-5 h-5" %}<span>Logout</span></button>
     </form>
   {% else %}
-    <a href="{% url 'admin:index' %}" class="mobile-nav-btn active" aria-current="page">
-      {% icon "shield" "w-5 h-5" %}<span>Admin</span>
+    <a href="{% url 'admin_panel:overview' %}" class="mobile-nav-btn {% if cur == 'admin_panel:overview' %}active{% endif %}" {% if cur == 'admin_panel:overview' %}aria-current="page"{% endif %}>
+      {% icon "grid" "w-5 h-5" %}<span>Overview</span>
     </a>
-    <a href="{% url 'accounts:profile' %}" class="mobile-nav-btn {% if cur == 'accounts:profile' %}active{% endif %}">
-      {% icon "user" "w-5 h-5" %}<span>My Profile</span>
+    <a href="{% url 'admin_panel:user_list' %}" class="mobile-nav-btn {% if 'admin_panel:user' in cur %}active{% endif %}" {% if 'admin_panel:user' in cur %}aria-current="page"{% endif %}>
+      {% icon "user" "w-5 h-5" %}<span>Users</span>
+    </a>
+    <a href="{% url 'admin_panel:appointment_list' %}" class="mobile-nav-btn {% if 'admin_panel:appointment' in cur %}active{% endif %}" {% if 'admin_panel:appointment' in cur %}aria-current="page"{% endif %}>
+      {% icon "clipboard" "w-5 h-5" %}<span>Appts</span>
+    </a>
+    <a href="{% url 'admin_panel:audit_logs' %}" class="mobile-nav-btn {% if cur == 'admin_panel:audit_logs' %}active{% endif %}" {% if cur == 'admin_panel:audit_logs' %}aria-current="page"{% endif %}>
+      {% icon "clock" "w-5 h-5" %}<span>Logs</span>
     </a>
     <form method="post" action="{% url 'accounts:logout' %}" style="display:contents;">{% csrf_token %}
       <button type="submit" class="mobile-nav-btn">{% icon "logout" "w-5 h-5" %}<span>Logout</span></button>
