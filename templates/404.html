@@ -2,15 +2,13 @@
 {% load ui %}
 {% block title %}Page Not Found · AppointED{% endblock %}
 {% block content %}
-<div class="card max-w-md mx-auto p-8 text-center">
-  <div class="mx-auto w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 inline-flex items-center justify-center mb-4">
-    {% icon "search" "w-7 h-7" %}
-  </div>
-  <div class="text-xs font-semibold uppercase tracking-wide text-indigo-600 dark:text-indigo-400">404 · Not found</div>
-  <h1 class="text-xl font-bold mt-1">We couldn't find that page</h1>
-  <p class="text-sm text-slate-600 dark:text-slate-400 mt-2">The link may be broken or the item may belong to another account.</p>
-  <div class="mt-6">
+<section class="error-center-card">
+  <div><span class="pill-dept">404 · Not found</span></div>
+  <p class="error-code">404</p>
+  <h1 class="page-title">We couldn't find that page</h1>
+  <p class="page-subtitle" style="font-size:14px;">The link may be broken or the item may belong to another account.</p>
+  <div class="action-row" style="padding-top:4px;">
     <a href="{% url 'scheduling:dashboard' %}" class="btn btn-primary">{% icon "home" "w-4 h-4" %}<span>Go to my dashboard</span></a>
   </div>
-</div>
+</section>
 {% endblock %}

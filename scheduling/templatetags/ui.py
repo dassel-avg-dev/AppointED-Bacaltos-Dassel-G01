@@ -9,8 +9,9 @@ from scheduling.models import Status
 
 register = template.Library()
 
-# Heroicons (MIT) outline, 24x24 stroke paths.
+# Heroicons (MIT) outline, 24x24 stroke paths + Figma grid/exit nav marks.
 ICONS = {
+    "grid": "M3.75 3.75h6.5v6.5h-6.5V3.75ZM13.75 3.75h6.5v6.5h-6.5V3.75ZM3.75 13.75h6.5v6.5h-6.5v-6.5ZM13.75 13.75h6.5v6.5h-6.5v-6.5Z",
     "calendar": "M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5",
     "clock": "M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
     "user": "M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z",
@@ -40,7 +41,7 @@ def icon(name, classes="w-5 h-5"):
     path = ICONS.get(name, "")
     return format_html(
         '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" '
-        'stroke-width="1.5" stroke="currentColor" class="{}" aria-hidden="true">'
+        'stroke-width="1.6" stroke="currentColor" class="{}" aria-hidden="true">'
         '<path stroke-linecap="round" stroke-linejoin="round" d="{}"/></svg>',
         classes,
         mark_safe(path),
@@ -50,7 +51,11 @@ def icon(name, classes="w-5 h-5"):
 @register.simple_tag
 def status_badge(status):
     label = dict(Status.choices).get(status, status)
-    return format_html('<span class="badge badge-{}">{}</span>', str(status).lower(), label)
+    return format_html(
+        '<span class="badge badge-{}"><span class="pill-dot" aria-hidden="true"></span>{}</span>',
+        str(status).lower(),
+        label,
+    )
 
 
 @register.simple_tag

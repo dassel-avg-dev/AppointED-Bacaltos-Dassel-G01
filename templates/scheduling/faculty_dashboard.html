@@ -2,100 +2,118 @@
 {% load ui %}
 {% block title %}Faculty Dashboard · AppointED{% endblock %}
 {% block content %}
-<div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-  <div>
-    <h1 class="text-2xl font-bold">Faculty Dashboard</h1>
-    <p class="text-sm text-slate-500 dark:text-slate-400">Review appointment requests and manage your schedule.</p>
+<div class="page-header">
+  <div class="page-header-copy">
+    <p class="page-kicker">{% now "l, j F Y"|upper %}</p>
+    <h1 class="page-title">Good morning, {{ user.full_name }}.</h1>
+    <p class="page-subtitle">A clear view of your time, requests, and conversations.</p>
   </div>
-  <a href="{% url 'scheduling:slot_create' %}" class="btn btn-primary">{% icon "plus" "w-4 h-4" %}<span>Add time slot</span></a>
+  <a href="{% url 'scheduling:slot_create' %}" class="btn btn-primary">+&nbsp;&nbsp;Add time slot</a>
 </div>
 
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-  <div class="card p-4 flex items-center gap-3.5">
-    <span class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950 text-amber-600 dark:text-amber-300 inline-flex items-center justify-center shrink-0">{% icon "clock" %}</span>
-    <div><div class="text-2xl font-bold">{{ pending_count }}</div><div class="text-xs text-slate-500 dark:text-slate-400">Pending requests</div></div>
+<div class="card-tint glance-banner">
+  <div class="glance-copy">
+    <h2>A little time. A lasting impact.</h2>
+    <p>
+      {% if pending_count %}
+        {{ pending_count }} student{{ pending_count|pluralize }} waiting to hear from you. Review requests below.
+      {% else %}
+        Your schedule is up to date. Open slots remain visible to students.
+      {% endif %}
+    </p>
   </div>
-  <div class="card p-4 flex items-center gap-3.5">
-    <span class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-300 inline-flex items-center justify-center shrink-0">{% icon "calendar" %}</span>
-    <div><div class="text-2xl font-bold">{{ approved_count }}</div><div class="text-xs text-slate-500 dark:text-slate-400">Approved</div></div>
-  </div>
-  <div class="card p-4 flex items-center gap-3.5">
-    <span class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-300 inline-flex items-center justify-center shrink-0">{% icon "check-circle" %}</span>
-    <div><div class="text-2xl font-bold">{{ completed_count }}</div><div class="text-xs text-slate-500 dark:text-slate-400">Completed</div></div>
-  </div>
-  <div class="card p-4 flex items-center gap-3.5">
-    <span class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 inline-flex items-center justify-center shrink-0">{% icon "inbox" %}</span>
-    <div><div class="text-2xl font-bold">{{ open_slots }} <span class="text-sm font-normal text-slate-400">/ {{ slot_count }}</span></div><div class="text-xs text-slate-500 dark:text-slate-400">Open / total slots</div></div>
+  <div class="glance-semester">
+    <p class="sem-label">CAMPUS CONSULTATIONS</p>
+    <p class="sem-value">{% now "Y" %}</p>
   </div>
 </div>
 
-<section class="mb-8">
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="font-semibold flex items-center gap-2">{% icon "clock" "w-5 h-5 text-amber-500" %}<span>Pending requests</span></h2>
-    <span class="text-xs text-slate-500 dark:text-slate-400">{{ pending_count }} waiting</span>
+<div class="metrics-grid">
+  <div class="metric-card">
+    <p class="metric-value">{{ pending_count }}</p>
+    <p class="metric-label">Pending requests</p>
   </div>
-  <div class="card divide-y divide-slate-200 dark:divide-slate-800">
-    {% for a in pending %}
-      <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div class="flex items-start gap-3 flex-1 min-w-0">
-          <span class="avatar w-10 h-10">{{ a.student.full_name|initials }}</span>
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <a class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline" href="{% url 'scheduling:appointment_detail' a.pk %}">{{ a.student.full_name }}</a>
-              <span class="text-xs text-slate-400">·</span>
-              <span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ a.type }}</span>
-              {% status_badge a.status %}
-            </div>
-            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
-              {% icon "calendar" "w-4 h-4 shrink-0" %}<span>{% slot_when a.slot %}</span>
-            </div>
-            <p class="text-sm text-slate-600 dark:text-slate-300 mt-1 truncate">{{ a.purpose }}</p>
-          </div>
-        </div>
-        {% include "scheduling/_actions.html" with appt=a actions=a.actions next=request.path %}
-      </div>
-    {% empty %}
-      <div class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        <div class="mx-auto w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 inline-flex items-center justify-center mb-2">{% icon "inbox" %}</div>
-        <p class="font-medium text-slate-700 dark:text-slate-300">No pending requests</p>
-        <p class="text-xs mt-0.5">New booking requests from students will show up here.</p>
-      </div>
-    {% endfor %}
+  <div class="metric-card">
+    <p class="metric-value">{{ approved_count }}</p>
+    <p class="metric-label green">Approved</p>
   </div>
-</section>
+  <div class="metric-card">
+    <p class="metric-value green">{{ completed_count }}</p>
+    <p class="metric-label green">Completed</p>
+  </div>
+  <div class="metric-card">
+    <p class="metric-value">{{ open_slots }} / {{ slot_count }}</p>
+    <p class="metric-label">Open / total slots</p>
+  </div>
+</div>
 
-<section>
-  <div class="flex items-center justify-between mb-3">
-    <h2 class="font-semibold flex items-center gap-2">{% icon "calendar" "w-5 h-5 text-blue-500" %}<span>Approved appointments</span></h2>
-    <a href="{% url 'scheduling:appointment_list' %}" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline">View all history</a>
-  </div>
-  <div class="card divide-y divide-slate-200 dark:divide-slate-800">
-    {% for a in approved %}
-      <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
-        <div class="flex items-start gap-3 flex-1 min-w-0">
-          <span class="avatar w-10 h-10">{{ a.student.full_name|initials }}</span>
-          <div class="min-w-0 flex-1">
-            <div class="flex flex-wrap items-center gap-2">
-              <a class="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline" href="{% url 'scheduling:appointment_detail' a.pk %}">{{ a.student.full_name }}</a>
-              <span class="text-xs text-slate-400">·</span>
-              <span class="text-xs font-medium text-slate-600 dark:text-slate-300">{{ a.type }}</span>
+<div class="two-col-panels">
+  <section class="card">
+    <div class="panel-header">
+      <div>
+        <h2 class="section-title">Pending requests</h2>
+        <p class="section-sub">{{ pending_count }} waiting for a response</p>
+      </div>
+    </div>
+    {% if pending %}
+      <div class="stack-12">
+        {% for a in pending %}
+          <article class="card-soft stack-12">
+            <div class="appt-row-head">
+              <div style="min-width:0;">
+                <a class="appt-name" href="{% url 'scheduling:appointment_detail' a.pk %}">{{ a.student.full_name }}</a>
+                <p class="appt-type">{{ a.type }}</p>
+              </div>
               {% status_badge a.status %}
             </div>
-            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-1.5">
-              {% icon "calendar" "w-4 h-4 shrink-0" %}<span>{% slot_when a.slot %}</span>
+            <p class="appt-time">{% slot_when a.slot %}</p>
+            <p class="appt-purpose">{{ a.purpose }}</p>
+            {% include "scheduling/_actions.html" with appt=a actions=a.actions next=request.path show_details=True %}
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="stack-12" style="padding-top:6px;">
+        <h3 class="font-serif" style="font-size:23px;margin:0;color:var(--ink-heading-sub);">All caught up.</h3>
+        <p class="page-subtitle">No pending requests right now. New student requests will appear here for your review.</p>
+        <div><a href="{% url 'scheduling:slot_list' %}" class="btn btn-soft">Manage open slots &nbsp;→</a></div>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="panel-header">
+      <div>
+        <h2 class="section-title">Approved appointments</h2>
+        <p class="section-sub">{{ approved_count }} confirmed session{{ approved_count|pluralize }}</p>
+      </div>
+    </div>
+    {% if approved %}
+      <div class="stack-12">
+        {% for a in approved %}
+          <article class="card-soft stack-12">
+            <div class="appt-row-head">
+              <div style="min-width:0;">
+                <a class="appt-name" href="{% url 'scheduling:appointment_detail' a.pk %}">{{ a.student.full_name }}</a>
+                <p class="appt-type">{{ a.type }}</p>
+              </div>
+              {% status_badge a.status %}
             </div>
-            <p class="text-sm text-slate-600 dark:text-slate-300 mt-1 truncate">{{ a.purpose }}</p>
-          </div>
-        </div>
-        {% include "scheduling/_actions.html" with appt=a actions=a.actions next=request.path %}
+            <p class="appt-time">{% slot_when a.slot %}</p>
+            <p class="appt-purpose">{{ a.purpose }}</p>
+            {% include "scheduling/_actions.html" with appt=a actions=a.actions next=request.path show_details=True show_complete_hint=True %}
+          </article>
+        {% endfor %}
+        <p class="field-help" style="padding-top:4px;">Complete is available only after a scheduled session ends.</p>
+        <a href="{% url 'scheduling:appointment_list' %}" class="text-link-action">View full appointment history &nbsp;→</a>
       </div>
-    {% empty %}
-      <div class="p-8 text-center text-sm text-slate-500 dark:text-slate-400">
-        <div class="mx-auto w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 inline-flex items-center justify-center mb-2">{% icon "calendar" %}</div>
-        <p class="font-medium text-slate-700 dark:text-slate-300">No approved appointments</p>
-        <p class="text-xs mt-0.5">Approve a pending request or <a class="text-indigo-600 dark:text-indigo-400 underline" href="{% url 'scheduling:slot_create' %}">publish more time slots</a>.</p>
+    {% else %}
+      <div class="stack-12" style="padding-top:6px;">
+        <h3 class="font-serif" style="font-size:23px;margin:0;color:var(--ink-heading-sub);">A little breathing room.</h3>
+        <p class="page-subtitle">No approved appointments yet. Approved requests or <a href="{% url 'scheduling:slot_create' %}" style="text-decoration:underline;">new time slots</a> will appear here.</p>
+        <div><a href="{% url 'scheduling:appointment_list' %}" class="btn btn-soft">View full history &nbsp;→</a></div>
       </div>
-    {% endfor %}
-  </div>
-</section>
+    {% endif %}
+  </section>
+</div>
 {% endblock %}

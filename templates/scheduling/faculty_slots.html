@@ -2,46 +2,57 @@
 {% load ui %}
 {% block title %}{{ faculty.full_name }} · AppointED{% endblock %}
 {% block content %}
-<a href="{% url 'scheduling:faculty_directory' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 mb-4">
-  {% icon "arrow-left" "w-4 h-4" %}<span>All faculty</span>
-</a>
-
-<div class="card p-5 mb-6 flex items-center gap-4">
-  <span class="avatar w-12 h-12 text-sm">{{ faculty.full_name|initials }}</span>
-  <div>
-    <h1 class="text-xl font-bold">{{ faculty.full_name }}</h1>
-    <p class="text-sm text-slate-500 dark:text-slate-400">{{ faculty.department|default:"No department" }}</p>
-  </div>
+<div class="page-header-copy">
+  <a href="{% url 'scheduling:faculty_directory' %}" class="back-link">{% icon "arrow-left" "w-4 h-4" %}<span>All faculty</span></a>
+  <h1 class="page-title">{{ faculty.full_name }}</h1>
+  <p class="page-subtitle">{{ faculty.department|default:"No department" }} &nbsp;·&nbsp; {{ faculty.email }}</p>
 </div>
 
 {% regroup slots by slot_date as day_groups %}
-<div class="space-y-6">
-  {% for day in day_groups %}
-    <section>
-      <div class="flex items-center gap-2 mb-2 px-1">
-        {% icon "calendar" "w-4 h-4 text-indigo-600 dark:text-indigo-400" %}
-        <h2 class="text-sm font-semibold">{{ day.grouper|friendly_day }}</h2>
-        <span class="text-xs text-slate-400">{{ day.grouper|date:"Y-m-d" }}</span>
-      </div>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {% for s in day.list %}
-          <div class="card p-4 flex items-center justify-between gap-3">
-            <div class="flex items-center gap-2 text-sm font-medium">
-              {% icon "clock" "w-4 h-4 text-slate-400" %}
-              <span>{% slot_time s %}</span>
-            </div>
-            <a href="{% url 'scheduling:book' s.pk %}" class="btn btn-primary btn-sm">Book</a>
-          </div>
-        {% endfor %}
-      </div>
-    </section>
-  {% empty %}
-    <div class="card p-10 text-center text-sm text-slate-500 dark:text-slate-400">
-      <div class="mx-auto w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 inline-flex items-center justify-center mb-3">{% icon "calendar" "w-6 h-6" %}</div>
-      <p class="font-medium text-slate-700 dark:text-slate-300">No open slots available</p>
-      <p class="text-xs mt-1 mb-4">This faculty member currently has no open consultation hours.</p>
-      <a href="{% url 'scheduling:faculty_directory' %}" class="btn btn-secondary btn-sm">Browse other faculty</a>
+{% if day_groups %}
+  <div class="card-tint glance-banner">
+    <div class="glance-copy">
+      <h2>{{ slots|length }} open consultation window{{ slots|length|pluralize }}</h2>
+      <p>Select a time below to submit a booking request. New requests start as Pending.</p>
     </div>
-  {% endfor %}
-</div>
+    <div><span class="pill pill-open"><span class="pill-dot" aria-hidden="true"></span>Available now</span></div>
+  </div>
+
+  <div class="stack-20">
+    {% for day in day_groups %}
+      <section class="stack-12">
+        <div style="display:flex;align-items:baseline;gap:10px;">
+          <h2 style="font-size:17px;font-weight:500;margin:0;color:var(--ink-primary);">{{ day.grouper|friendly_day }}</h2>
+          <span class="field-help">{{ day.grouper|date:"D, j M Y" }}</span>
+        </div>
+        {% for s in day.list %}
+          <article class="slot-row">
+            <div class="slot-row-info">
+              <p class="appt-name">{% slot_time s %}</p>
+              <p class="appt-type">Philippine time (UTC+08:00)</p>
+            </div>
+            <div class="slot-row-state">
+              <span class="pill pill-open"><span class="pill-dot" aria-hidden="true"></span>Open</span>
+            </div>
+            <div class="slot-row-actions">
+              <a href="{% url 'scheduling:book' s.pk %}" class="btn btn-primary btn-sm">Book this slot →</a>
+            </div>
+          </article>
+        {% endfor %}
+      </section>
+    {% endfor %}
+  </div>
+{% else %}
+  <section class="card stack-16" style="padding:40px 44px;">
+    <p class="page-kicker">NO OPEN SLOTS</p>
+    <h2 class="font-serif" style="font-size:36px;line-height:1.25;margin:0;">A little patience.<br>The right time will come.</h2>
+    <p class="page-subtitle" style="font-size:14px;">{{ faculty.full_name }} currently has no open consultation hours. Check back later or browse another faculty member’s schedule.</p>
+    <div><a href="{% url 'scheduling:faculty_directory' %}" class="btn btn-primary">Browse other faculty &nbsp;→</a></div>
+  </section>
+
+  <div class="card-tint stack-12">
+    <h3 style="font-size:17px;font-weight:600;margin:0;">Looking for support?</h3>
+    <p class="page-subtitle">Filter the Faculty Directory by department to find other available faculty.</p>
+  </div>
+{% endif %}
 {% endblock %}

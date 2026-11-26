@@ -1,41 +1,92 @@
 {% extends "base.html" %}
-{% load ui %}
+{% load static ui %}
 {% block title %}Login · AppointED{% endblock %}
-{% block content %}
-<div class="grid lg:grid-cols-2 gap-8 items-center max-w-4xl mx-auto">
-  <div class="hidden lg:flex flex-col justify-between rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-800 text-white p-8 min-h-[420px]">
+{% block shell %}
+<div class="auth-shell">
+  <aside class="auth-aside">
     <div>
-      <div class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-medium mb-6">
-        {% icon "calendar" "w-4 h-4" %}<span>Faculty appointment scheduling</span>
+      <div class="auth-logo-row">
+        <img src="{% static 'img/logo-mark-inverse.svg' %}" alt="" class="auth-logo-mark">
+        <div>
+          <p class="auth-logo">AppointED</p>
+          <p class="auth-logo-sub">CAMPUS CONSULTATIONS</p>
+        </div>
       </div>
-      <h1 class="text-2xl font-bold leading-snug">Check availability and book faculty consultations online.</h1>
-      <p class="mt-3 text-sm text-indigo-100">No more walk-in guesswork—pick an open slot, send a request, and track every status update.</p>
     </div>
-    <ul class="space-y-2.5 text-sm text-indigo-100">
-      <li class="flex items-center gap-2">{% icon "check-circle" "w-5 h-5 text-emerald-300" %}<span>Real-time open time slots</span></li>
-      <li class="flex items-center gap-2">{% icon "check-circle" "w-5 h-5 text-emerald-300" %}<span>Clear Pending, Approved, and Completed statuses</span></li>
-      <li class="flex items-center gap-2">{% icon "check-circle" "w-5 h-5 text-emerald-300" %}<span>Full status history on every appointment</span></li>
-    </ul>
-  </div>
 
-  <div class="card p-6 sm:p-8 max-w-md w-full mx-auto">
-    <h1 class="text-xl font-bold mb-1">Welcome back</h1>
-    <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Sign in with your school email.</p>
+    <div>
+      <p class="auth-kicker">LESS WAITING. MORE POSSIBILITY.</p>
+      <h1 class="auth-hero">A little planning.<br>A better connection.</h1>
+      <p class="auth-lead">Your campus, on the same page. Find the right time to ask questions, get advice, and move forward.</p>
 
-    {% if form.non_field_errors %}
-      <div class="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-200 px-3.5 py-2.5 text-sm">
-        {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+      <div class="auth-preview-card">
+        <p class="auth-preview-kicker">YOUR NEXT CONVERSATION</p>
+        <p class="auth-preview-date">Friday, 27 November</p>
+        <p class="auth-preview-time">09:00 – 09:30 AM</p>
+        <div class="auth-preview-divider"></div>
+        <p class="auth-preview-meta">Consultation with Faculty Advisor</p>
+        <div class="auth-steps">
+          <div>
+            <div class="auth-step-badge">1</div>
+            <p class="auth-step-text">Browse open slots</p>
+          </div>
+          <div>
+            <div class="auth-step-badge">2</div>
+            <p class="auth-step-text">Send a request</p>
+          </div>
+          <div>
+            <div class="auth-step-badge">3</div>
+            <p class="auth-step-text">Track every update</p>
+          </div>
+        </div>
       </div>
-    {% endif %}
+    </div>
 
-    <form method="post" class="space-y-4">{% csrf_token %}
-      {% for f in form %}{% include "_field.html" %}{% endfor %}
-      <button class="btn btn-primary w-full py-2.5">Login</button>
-    </form>
+    <div class="auth-aside-footer">
+      <p class="auth-aside-title">Built for students. Made for faculty.</p>
+      <p>Real-time availability &nbsp;·&nbsp; Clear approvals &nbsp;·&nbsp; A complete audit trail</p>
+      <p class="auth-aside-brand-foot">APPOINTED &nbsp;/&nbsp; UNIVERSITY CONSULTATION PLATFORM</p>
+    </div>
+  </aside>
 
-    <p class="text-sm text-center text-slate-500 dark:text-slate-400 mt-6">
-      No account yet? <a class="text-indigo-600 dark:text-indigo-400 font-medium hover:underline" href="{% url 'accounts:register' %}">Create one</a>
-    </p>
-  </div>
+  <main class="auth-main">
+    <div class="auth-topbar">
+      <form method="post" action="{% url 'set_theme' %}">{% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        {% if theme == 'dark' %}
+          <button type="submit" name="theme" value="light" class="auth-theme-pill">
+            {% icon "sun" "w-4 h-4" %}<span>Dark theme · Switch to light</span>
+          </button>
+        {% else %}
+          <button type="submit" name="theme" value="dark" class="auth-theme-pill">
+            {% icon "moon" "w-4 h-4" %}<span>Light theme · Switch to dark</span>
+          </button>
+        {% endif %}
+      </form>
+    </div>
+
+    <div class="auth-form-wrap">
+      {% include "_messages.html" %}
+      <h2 class="auth-form-title">Welcome back</h2>
+      <p class="auth-form-sub">Sign in with your school email to manage consultations, slots, and&nbsp;updates.</p>
+
+      {% if form.non_field_errors %}
+        <div class="alert-error" role="alert" style="margin-bottom:16px;">
+          {% for err in form.non_field_errors %}<p style="margin:0;">{{ err }}</p>{% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" class="stack-16">{% csrf_token %}
+        {% for f in form %}{% include "_field.html" %}{% endfor %}
+        <button type="submit" class="btn btn-primary btn-lg">Sign in &nbsp;→</button>
+      </form>
+
+      <p style="text-align:center;font-size:13px;margin-top:22px;color:var(--ink-body);">
+        New to AppointED? &nbsp;<a href="{% url 'accounts:register' %}" style="font-weight:600;text-decoration:underline;text-underline-offset:3px;">Create an account</a>
+      </p>
+    </div>
+
+    <div class="auth-footer-note">© 2026 AppointED &nbsp;·&nbsp; Make every consultation count.</div>
+  </main>
 </div>
 {% endblock %}

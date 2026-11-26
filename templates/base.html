@@ -1,21 +1,66 @@
-{% load ui %}<!doctype html>
-<html lang="en" class="{% if theme == 'dark' %}dark{% endif %}">
+{% load static ui %}<!doctype html>
+<html lang="en" class="{% if theme == 'dark' %}dark{% endif %}" data-theme="{{ theme|default:'light' }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}AppointED{% endblock %}</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><text x='16' y='22' font-family='sans-serif' font-size='18' font-weight='bold' text-anchor='middle' fill='white'>A</text></svg>">
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/logo-mark.svg' %}">
   {% include "_styles.html" %}
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col antialiased">
-  {% include "_navbar.html" %}
-  <main class="max-w-5xl w-full mx-auto px-4 sm:px-6 py-8 flex-1">
-    {% include "_messages.html" %}
-    {% block content %}{% endblock %}
-  </main>
-  <footer class="border-t border-slate-200 dark:border-slate-800 py-5 text-center text-xs text-slate-500 dark:text-slate-400">
-    AppointED · Faculty appointment scheduling
-  </footer>
+<body>
+  {% block shell %}
+    <div class="workspace-shell">
+      {% include "_navbar.html" %}
+      <div class="main-column">
+        <header class="topbar">
+          <div class="topbar-left">
+            <a href="{% if user.is_authenticated %}{% url 'scheduling:dashboard' %}{% else %}{% url 'accounts:login' %}{% endif %}" class="mobile-brand">
+              <img src="{% static 'img/logo-mark.svg' %}" alt="" class="mobile-brand-mark">
+              <span>AppointED</span>
+            </a>
+            <span class="topbar-breadcrumb">
+              Workspace &nbsp;/&nbsp;
+              {% if user.is_authenticated %}{{ user.get_role_display }}{% else %}Guest{% endif %}
+            </span>
+          </div>
+          <div class="topbar-right">
+            <form method="post" action="{% url 'set_theme' %}">{% csrf_token %}
+              <input type="hidden" name="next" value="{{ request.get_full_path }}">
+              {% if theme == 'dark' %}
+                <button type="submit" name="theme" value="light" class="topbar-icon-btn" title="Switch to light mode" aria-label="Switch to light mode">
+                  {% icon "sun" "w-5 h-5" %}
+                </button>
+              {% else %}
+                <button type="submit" name="theme" value="dark" class="topbar-icon-btn" title="Switch to dark mode" aria-label="Switch to dark mode">
+                  {% icon "moon" "w-5 h-5" %}
+                </button>
+              {% endif %}
+            </form>
+
+            {% if user.is_authenticated %}
+              <a href="{% url 'accounts:profile' %}" class="user-chip">
+                <span class="avatar-circle">{{ user.full_name|initials }}</span>
+                <span class="user-chip-text">
+                  <span class="user-chip-name">{{ user.full_name }}</span>
+                  <span class="user-chip-role">{{ user.get_role_display }}</span>
+                </span>
+              </a>
+            {% else %}
+              <div class="action-row">
+                <a href="{% url 'accounts:login' %}" class="btn btn-soft btn-sm">Login</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-sm">Register</a>
+              </div>
+            {% endif %}
+          </div>
+        </header>
+
+        <main class="content-container">
+          {% include "_messages.html" %}
+          {% block content %}{% endblock %}
+        </main>
+      </div>
+    </div>
+  {% endblock %}
+  <script src="{% static 'js/appointed.js' %}"></script>
 </body>
 </html>

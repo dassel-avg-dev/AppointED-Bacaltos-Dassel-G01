@@ -93,3 +93,15 @@ class UIPolishTests(TestCase):
         r = self.client.get(reverse("scheduling:dashboard"))
         self.assertEqual(r.context["pending_count"], 1)
         self.assertEqual(r.context["slot_count"], 1)
+
+    def test_new_figma_logo_and_static_assets_rendered(self):
+        r_login = self.client.get(reverse("accounts:login"))
+        self.assertContains(r_login, "logo-mark.svg")
+        self.assertContains(r_login, "logo-mark-inverse.svg")
+        self.assertContains(r_login, "appointed.css")
+        self.assertContains(r_login, "appointed.js")
+
+        self.client.force_login(self.f)
+        r_dash = self.client.get(reverse("scheduling:dashboard"))
+        self.assertContains(r_dash, "logo-mark-inverse.svg")
+        self.assertContains(r_dash, f"Good morning, {self.f.full_name}.")

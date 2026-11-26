@@ -1,32 +1,70 @@
-/* AppointED indigo palette for Django Admin (light & dark) */
+/* AppointED #102a56 navy + Lora/Inter palette for Django Admin (light & dark) */
 :root, html[data-theme="light"] {
-  --primary: #4f46e5;
-  --secondary: #4338ca;
-  --accent: #e0e7ff;
+  --primary: #183f7d;
+  --secondary: #102a56;
+  --accent: #e5edf9;
   --primary-fg: #ffffff;
-  --header-bg: #312e81;
-  --header-color: #e0e7ff;
-  --header-link-color: #ffffff;
-  --breadcrumbs-bg: #4338ca;
-  --breadcrumbs-fg: #e0e7ff;
-  --link-fg: #4f46e5;
-  --link-hover-color: #3730a3;
-  --button-bg: #4f46e5;
-  --button-hover-bg: #4338ca;
-  --default-button-bg: #3730a3;
-  --default-button-hover-bg: #312e81;
+  --header-bg: #102a56;
+  --header-color: #dbe5f4;
+  --header-link-color: #eff3fa;
+  --breadcrumbs-bg: #193967;
+  --breadcrumbs-fg: #dbe5f4;
+  --link-fg: #183f7d;
+  --link-hover-color: #102a56;
+  --button-bg: #183f7d;
+  --button-hover-bg: #123163;
+  --default-button-bg: #102a56;
+  --default-button-hover-bg: #183f7d;
+  --body-bg: #f3f6fb;
+  --body-fg: #172d50;
+  --hairline-color: #e2e9f4;
+  --border-color: #ced8e8;
 }
+
 html[data-theme="dark"] {
-  --primary: #6366f1;
-  --secondary: #4f46e5;
-  --accent: #c7d2fe;
-  --header-bg: #1e1b4b;
-  --breadcrumbs-bg: #312e81;
-  --link-fg: #818cf8;
-  --link-hover-color: #a5b4fc;
-  --button-bg: #4f46e5;
-  --button-hover-bg: #6366f1;
-  --default-button-bg: #4338ca;
-  --default-button-hover-bg: #4f46e5;
+  --primary: #a8ccff;
+  --secondary: #1e3a62;
+  --accent: #dceaff;
+  --primary-fg: #172d50;
+  --header-bg: #102a56;
+  --header-color: #dbe5f4;
+  --header-link-color: #eff5ff;
+  --breadcrumbs-bg: #14243e;
+  --breadcrumbs-fg: #b6c7df;
+  --link-fg: #a8ccff;
+  --link-hover-color: #c3dcff;
+  --button-bg: #294363;
+  --button-hover-bg: #335278;
+  --default-button-bg: #a8ccff;
+  --default-button-hover-bg: #c3dcff;
+  --default-button-fg: #172d50;
+  --body-bg: #0b1426;
+  --body-fg: #eff5ff;
+  --darkened-bg: #14243e;
+  --hairline-color: #243b5e;
+  --border-color: #314b74;
 }
-#site-name a { font-weight: 700; letter-spacing: -0.01em; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+h1, h2, #site-name {
+  font-family: 'Lora', Georgia, serif;
+}
+
+.appointed-admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 400;
+  font-size: 20px;
+  color: #eff3fa;
+  text-decoration: none;
+}
+
+.appointed-admin-logo {
+  width: 26px;
+  height: 26px;
+  display: block;
+}

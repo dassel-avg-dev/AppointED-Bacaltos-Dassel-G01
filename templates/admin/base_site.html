@@ -1,8 +1,19 @@
 {% extends "admin/base.html" %}
 {% load static %}
 {% block title %}{{ title }} | AppointED Admin{% endblock %}
-{% block extrastyle %}{{ block.super }}<link rel="stylesheet" href="{% static 'admin/appointed.css' %}">{% endblock %}
-{% block branding %}
-<div id="site-name"><a href="{% url 'admin:index' %}">AppointED Admin</a></div>
+{% block extrastyle %}{{ block.super }}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="{% static 'img/logo-mark.svg' %}">
+<link rel="stylesheet" href="{% static 'admin/appointed.css' %}">
 {% endblock %}
-{% block nav-global %}<a href="/" style="margin-left:1rem;font-size:.8rem;">← Back to site</a>{% endblock %}
+{% block branding %}
+<div id="site-name">
+  <a href="{% url 'admin:index' %}" class="appointed-admin-brand">
+    <img src="{% static 'img/logo-mark-inverse.svg' %}" alt="" class="appointed-admin-logo">
+    <span>AppointED Admin</span>
+  </a>
+</div>
+{% endblock %}
+{% block nav-global %}<a href="/" style="margin-left:1rem;font-size:.82rem;">← Back to site</a>{% endblock %}

@@ -2,36 +2,49 @@
 {% load ui %}
 {% block title %}{% if is_edit %}Edit Time Slot{% else %}Add Time Slot{% endif %} · AppointED{% endblock %}
 {% block content %}
-<div class="max-w-lg mx-auto">
-  <a href="{% url 'scheduling:slot_list' %}" class="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-indigo-600 mb-4">
-    {% icon "arrow-left" "w-4 h-4" %}<span>Back to My Slots</span>
-  </a>
-  <div class="card p-6 sm:p-8">
-    <div class="flex items-center gap-3 mb-6">
-      <span class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 inline-flex items-center justify-center">{% icon "calendar" %}</span>
-      <div>
-        <h1 class="text-xl font-bold">{% if is_edit %}Edit time slot{% else %}Add time slot{% endif %}</h1>
-        <p class="text-xs text-slate-500 dark:text-slate-400">Slots must be in the future and cannot overlap existing slots.</p>
-      </div>
-    </div>
+<div class="page-header-copy">
+  <a href="{% url 'scheduling:slot_list' %}" class="back-link">{% icon "arrow-left" "w-4 h-4" %}<span>Back to My Slots</span></a>
+  <h1 class="page-title">{% if is_edit %}Edit time slot{% else %}Add time slot{% endif %}</h1>
+  <p class="page-subtitle">{% if is_edit %}Update this open slot. Booked slots cannot be edited.{% else %}Open a time window for student consultations.{% endif %}</p>
+</div>
+
+<div class="split-editor-grid">
+  <form method="post" class="card card-lg stack-20">{% csrf_token %}
+    <h2 class="section-title">Slot details</h2>
 
     {% if form.non_field_errors %}
-      <div class="mb-4 rounded-xl bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-200 px-3.5 py-2.5 text-sm">
-        {% for err in form.non_field_errors %}<p>{{ err }}</p>{% endfor %}
+      <div class="alert-error" role="alert">
+        <strong>This slot could not be saved.</strong>
+        {% for err in form.non_field_errors %}<p style="margin:4px 0 0 0;">{{ err }}</p>{% endfor %}
       </div>
     {% endif %}
 
-    <form method="post" class="space-y-4">{% csrf_token %}
-      {% include "_field.html" with f=form.slot_date %}
-      <div class="grid sm:grid-cols-2 gap-4">
-        {% include "_field.html" with f=form.start_time %}
-        {% include "_field.html" with f=form.end_time %}
+    {% include "_field.html" with f=form.slot_date %}
+    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;">
+      {% include "_field.html" with f=form.start_time %}
+      {% include "_field.html" with f=form.end_time %}
+    </div>
+    <p class="field-help">All times are in Philippine time (UTC+08:00).</p>
+
+    <div class="action-row">
+      <button type="submit" class="btn btn-primary">{% icon "check" "w-4 h-4" %}<span>{% if is_edit %}Save changes{% else %}Save slot{% endif %}</span></button>
+      <a href="{% url 'scheduling:slot_list' %}" class="btn btn-soft">Cancel</a>
+    </div>
+  </form>
+
+  <aside class="card-tint stack-16">
+    <h2 class="font-serif" style="font-size:25px;margin:0;">Good availability starts here.</h2>
+    <p style="font-size:13px;font-weight:500;margin:0;">01 &nbsp;Choose a future date and time.</p>
+    <p style="font-size:13px;font-weight:500;margin:0;">02 &nbsp;End time must be after start time.</p>
+    <p style="font-size:13px;font-weight:500;margin:0;">03 &nbsp;Slots cannot overlap your existing availability.</p>
+    <p class="field-help">New slots are immediately visible as Open. Students can send a request when a slot is available.</p>
+    {% if is_edit and slot %}
+      <div class="affected-box">
+        <p style="margin:0 0 4px 0;font-weight:600;font-size:12px;">Original slot</p>
+        <p style="margin:0;font-size:12px;">{% slot_when slot %}</p>
+        <p style="margin:4px 0 0 0;font-size:11px;color:var(--ink-muted);">No booking attached</p>
       </div>
-      <div class="flex justify-end gap-2 pt-2">
-        <a href="{% url 'scheduling:slot_list' %}" class="btn btn-secondary">Cancel</a>
-        <button class="btn btn-primary">{% icon "check" "w-4 h-4" %}<span>{% if is_edit %}Save changes{% else %}Save slot{% endif %}</span></button>
-      </div>
-    </form>
-  </div>
+    {% endif %}
+  </aside>
 </div>
 {% endblock %}
